@@ -16,6 +16,11 @@
 		<PackageTags>console;utility;windows;linux;osx</PackageTags>
   </PropertyGroup>
 
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources/Images.xml"/>
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Spectre.Console" Version="0.54.0" />
     <PackageReference Include="Spectre.Console.Cli" Version="0.53.1" />
