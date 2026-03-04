@@ -75,15 +75,16 @@ public class DebianPackageApi(Architecture architecture) : PackageSearchApi
 
         while (currentStartIndex < span.Length)
         {
-            // Slice the remaining data to search within
+            // Slicing the span to check only the remaining content.
             ReadOnlySpan<byte> remaining = span[currentStartIndex..];
             
-            // Find the next blank line (\n\n)
+            // Finding the next index of the delimiter (double newline chars)
             int relativeIndex = remaining.IndexOf("\n\n"u8);
 
+            // -1 Indicates that this is the final package block
+            // It is captured and execution ends here.
             if (relativeIndex == -1) 
             {
-                // Capture the final package block
                 ReadOnlyMemory<byte> lastSlice = buffer[currentStartIndex..];
                 if (IsWhiteSpace(lastSlice.Span)) {
                     packageData.Add(packagesFound++, lastSlice);
@@ -91,18 +92,18 @@ public class DebianPackageApi(Architecture architecture) : PackageSearchApi
                 break;
             }
 
-            // Determine if we are dealing with \r\n\n or just \n\n
-            // This ensures we don't leave a trailing \r in the package memory
+            // Determines if we are dealing a carriage return prior to the delimeter.
+            // This ensures we don't leave a trailing CR in the package memory
             int sliceLength = relativeIndex;
             if (relativeIndex > 0 && remaining[relativeIndex - 1] == (byte)'\r')
             {
                 sliceLength--; 
             }
 
-            // Add the package block to the dictionary
+            // Adds the package block to the dictionary.
             packageData.Add(packagesFound++, buffer.Slice(currentStartIndex, sliceLength));
 
-            // Advance: move past the found index + the 2 bytes of '\n\n'
+            // Advances beyond the last block then another 2 bytes to account for the delimiter.
             currentStartIndex += relativeIndex + 2;
         }
 
@@ -315,7 +316,13 @@ public class DebianPackageApi(Architecture architecture) : PackageSearchApi
         return manifest;
     }
 
-    private static void ParseManifestLine(ReadOnlySpan<byte> block, ReadOnlySpan<byte> line, int lineOffset, ref ManifestParserState state, DebianManifest manifest)
+    private static void ParseManifestLine(
+        ReadOnlySpan<byte> block, 
+        ReadOnlySpan<byte> line, 
+        int lineOffset, 
+        ref ManifestParserState state, 
+        DebianManifest manifest
+    )
     {
         var isReturnCarriage = line.Length == 1 && line[0] == (byte)'\r';
         var lineStartsWithSpace = line[0] == (byte)' ';

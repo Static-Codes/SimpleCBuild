@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Spectre.Console;
 using static EasyDockerFile.Core.Common.Constants;
 
@@ -40,5 +41,25 @@ public static class InputHelper
         return options.Append(ExitChoice); 
     }
     public static bool IsExitOption(this string choice) => choice.Equals(ExitChoice);
+
+    public static void UserExitStatusCheck(string inputString) 
+    {
+        if (inputString.IsExitOption()) {
+            Console.WriteLine("[INFO]: Operation cancelled by user.");
+            Console.WriteLine("[INFO]: Exiting.");
+            Environment.Exit(1);
+        }
+    }
+
+    // The [NotNull] attribute tells roslyn, if this method returns:
+    // The argument 'input' is guaranteed not to be null.
+    public static void CheckForNullInput([NotNull] object? input)
+    {
+        if (input is null)
+        {
+            // Or your specific logic/Spectre.Console exit strategy
+            throw new ArgumentNullException(nameof(input), "Selection cannot be null.");
+        }
+    }
 
 }

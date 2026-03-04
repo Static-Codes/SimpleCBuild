@@ -1,18 +1,45 @@
-﻿using static EasyDockerFile.Core.Helpers.ImageLoader;
+﻿using static EasyDockerFile.Core.Helpers.FamilyLoader;
 using static EasyDockerFile.Core.Helpers.InputHelper;
 using Spectre.Console;
+using EasyDockerFile.Core.Helpers;
+using EasyDockerFile.Core.Extensions;
 
 
+// Retrieving families
 var families = GetFamilies();
-var familyNames = families.Select(fam => fam.Name);
 
+
+// Choosing image family
+var familyNames = families.Select(fam => fam.Name);
 var familyChoice = AskForInput(
     message: "Please select your desired image family.", 
     options: MakeInputMenu(familyNames)
 );
+UserExitStatusCheck(familyChoice);
 
-Console.WriteLine($"User's choice: {familyChoice}");
-Console.WriteLine($"User wants to exit: {familyChoice.IsExitOption()}");
+var family = families.GetFamily(familyChoice);
+CheckForNullInput(family);
+
+
+// Choosing image version
+Console.WriteLine(family.Images.Length);
+var imageNames = family.Images.Select(a => a.FullName);
+CheckForNullInput(imageNames);
+
+var imageChoice = AskForInput(
+    message: "Please select your desired image version.", 
+    options: MakeInputMenu(imageNames!)
+);
+UserExitStatusCheck(imageChoice);
+
+var selectedImage = family.Images.GetImage(imageChoice);
+CheckForNullInput(selectedImage);
+
+
+
+Console.WriteLine("{0}: {1}", nameof(familyChoice), familyChoice);
+Console.WriteLine("{0}: {1}", nameof(selectedImage), selectedImage!.FullName);
+Console.WriteLine($"Exiting Option Selected: {familyChoice.IsExitOption()}");
 
 
 

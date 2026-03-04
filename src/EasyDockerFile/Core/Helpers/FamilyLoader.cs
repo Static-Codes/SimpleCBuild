@@ -1,11 +1,10 @@
 using System.Reflection;
 using System.Xml.Serialization;
-using EasyDockerFile.Core.Extensions;
 using EasyDockerFile.Core.Types.ImageTypes;
 
 namespace EasyDockerFile.Core.Helpers;
 
-public static class ImageLoader 
+public static class FamilyLoader 
 {
     private static readonly string ImageXMLPattern = "EasyDockerFile.Resources.Images.xml";
     private static readonly Assembly _assembly = Assembly.GetExecutingAssembly();
@@ -41,5 +40,4 @@ public static class ImageLoader
         Console.WriteLine("[SUCCESS]: Loaded Base Docker families.");
         return families;
     }
-
 }

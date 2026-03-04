@@ -14,4 +14,19 @@ public static class ImageExtension
             }
         }
     }
+
+    public static ImageFamily? GetFamily(this ImageFamily[] imageFamilies, string familyName) {
+        return 
+            imageFamilies
+            .Where(family => family.Name == familyName)
+            .FirstOrDefault();
+    }
+
+    public static Image? GetImage(this Image[] images, string imageName) {
+        return 
+            images
+            .Where(image => image.FullName == imageName)
+            .FirstOrDefault();
+    }
+    
 }

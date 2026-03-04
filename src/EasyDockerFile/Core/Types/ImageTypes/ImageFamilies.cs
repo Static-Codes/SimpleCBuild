@@ -9,3 +9,4 @@ public class ImageFamilies
     [XmlElement("family")]
     public ImageFamily[] SupportedFamilies { get; set; } = [];
 }
+

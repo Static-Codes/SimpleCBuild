@@ -8,7 +8,6 @@ public class ImageFamily
     [XmlText]
     public string Name { get; set; } = string.Empty;
 
-    [XmlArray("images")]
-    [XmlArrayItem("image")]
+    [XmlElement("image")]
     public Image[] Images { get; set; } = [];
 }
