@@ -6,8 +6,13 @@ using Spectre.Console;
 var families = GetFamilies();
 var familyNames = families.Select(fam => fam.Name);
 
-var familyChoice = AskForInput("Please select your desired image family.", familyNames);
-Console.WriteLine(familyChoice);
+var familyChoice = AskForInput(
+    message: "Please select your desired image family.", 
+    options: MakeInputMenu(familyNames)
+);
+
+Console.WriteLine($"User's choice: {familyChoice}");
+Console.WriteLine($"User wants to exit: {familyChoice.IsExitOption()}");
 
 
 
