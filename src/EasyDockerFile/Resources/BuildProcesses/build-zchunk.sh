@@ -51,10 +51,6 @@ echo -e "[COMMAND]: ninja test\n"
 ninja test || { echo -e "[ERROR]: Unable to run build tests\n"; exit 9; }
 echo -e "[SUCCESS]: All build tests passed\n"
 
-echo -e "[INFO]: Removing temporary build directory\n"
-rm -rf "$TMP_CLONE_DIR" || { echo -e "[ERROR]: Unable to remove temporary build directory\n"; exit 10; }
-echo -e "[SUCCESS]: Removed temporary build directory\n"
-
 echo -e "[INFO]: Removing build dependencies\n"
 echo -e "[COMMAND]: sudo apt purge -y meson ninja-build pkg-config libcurl4-openssl-dev libzstd-dev libssl-dev zlib1g-dev"
 sudo apt purge -y meson ninja-build pkg-config libcurl4-openssl-dev libzstd-dev libssl-dev zlib1g-dev ||  {  echo -e "[ERROR]: Failed to remove build dependencies\n"; exit 11; }
