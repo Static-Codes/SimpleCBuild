@@ -1,4 +1,3 @@
-<!-- Debian 13.2/13.3 (x64, arm64, armhf) -->
 <families>
     <family>Debian
         <image>
@@ -23,26 +22,22 @@
         </image>
     </family> 
 
-    <!-- Fedora 43/44 (x64, arm64, armhf) -->
+    
     <family>Fedora
         <image>
             <version>43.0</version>
             <full_name>Fedora 43.0</full_name>
             <supported_architectures>
-                <supported_architecture>x64</supported_architecture>
                 <supported_architecture>arm64</supported_architecture>
-                <supported_architecture>armel</supported_architecture>
-                <supported_architecture>armhf</supported_architecture>
+                <supported_architecture>x64</supported_architecture>
             </supported_architectures>
         </image>
         <image>
-            <version>44.0</version>
-            <full_name>Fedora 44.0</full_name>
+            <version>42.0</version>
+            <full_name>Fedora 42.0</full_name>
             <supported_architectures>
-                <supported_architecture>x64</supported_architecture>
                 <supported_architecture>arm64</supported_architecture>
-                <supported_architecture>armel</supported_architecture>
-                <supported_architecture>armhf</supported_architecture>
+                <supported_architecture>x64</supported_architecture>
             </supported_architectures>
         </image>
     </family> 
