@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TrimmerRootDescriptor Include="../EasyDockerFile/Resources/Roots.xml" />
+    <TrimmerRootDescriptor Include="../EasyDockerFile/Resources/Trimmer/Roots.xml" />
   </ItemGroup>
 
 </Project>

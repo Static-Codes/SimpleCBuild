@@ -1,7 +1,0 @@
-<linker>
-    <assembly fullname="easy-dockerfile"> 
-        <type fullname="EasyDockerFile.Core.Types.ImageTypes.ImageFamilies" preserve="all" />
-        <type fullname="EasyDockerFile.Core.Types.ImageTypes.ImageFamily" preserve="all" />
-        <type fullname="EasyDockerFile.Core.Types.ImageTypes.Image" preserve="all" />
-    </assembly>
-</linker>

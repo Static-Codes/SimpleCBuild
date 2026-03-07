@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources/Images.xml"/>
+    <EmbeddedResource Include="Resources/Utilities/**"/> 
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TrimmerRootDescriptor Include="Resources/Roots.xml" />
+    <TrimmerRootDescriptor Include="Resources/Trimmer/Roots.xml" />
   </ItemGroup>
 </Project>

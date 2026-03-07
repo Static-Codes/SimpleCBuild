@@ -1,0 +1,23 @@
+<linker>
+    <assembly fullname="easy-dockerfile"> 
+        <type fullname="EasyDockerFile.Core.Types.ImageTypes.ImageFamilies" preserve="all" />
+        <type fullname="EasyDockerFile.Core.Types.ImageTypes.ImageFamily" preserve="all" />
+        <type fullname="EasyDockerFile.Core.Types.ImageTypes.Image" preserve="all" />
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests" preserve="all"/>
+        <!-- <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.RepoMDChecksum" preserve="all"/>
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.RepoMDOpenChecksum" preserve="all"/>
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.RepoMDLocation" preserve="all"/>
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.RepoMDData" preserve="all"/>
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.RepoMD" preserve="all"/>
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.Package" preserve="all"/>
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.Requires" preserve="all"/>
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.Provides" preserve="all"/>
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.Entry" preserve="all"/>
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.Headerrange" preserve="all"/>
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.Location" preserve="all"/>
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.Size" preserve="all"/>
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.Time" preserve="all"/>
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.Checksum" preserve="all"/>
+        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.Version" preserve="all"/> -->
+    </assembly>
+</linker>
