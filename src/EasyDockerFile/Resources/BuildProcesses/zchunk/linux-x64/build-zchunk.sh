@@ -9,8 +9,7 @@
 # 7 => Failed to install build dependencies
 # 8 => Failed to compile static library 
 # 9 => Build tests failed.
-# 10 => Failed to remove temporary directory
-# 11 => Failed to remove build dependencies
+# 10 => Failed to remove build dependencies
 
 TMP_DIR="$HOME/.tmp"
 TMP_CLONE_DIR="$TMP_DIR/zchunk"
@@ -38,7 +37,7 @@ echo -e "[SUCCESS]: Navigated to $TMP_CLONE_DIR"
 
 echo -e "[INFO]: Starting build process for zchunk\n"
 echo -e "[COMMAND]: CFLAGS=-I/usr/local/include CXXFLAGS=-I/usr/local/include LDFLAGS=-L/usr/local/lib meson build --default-library=static \n"
-meson setup build --default-library=static -Dbuildtype=release || {  echo -e "[ERROR]: Failed to install build dependencies\n"; exit 7; }
+meson setup build --default-library=static -Dbuildtype=release || {  echo -e "[ERROR]: Failed to start build process.\n"; exit 7; }
 echo -e "[SUCCESS]: Successfully built meson setup files\n"
 
 echo -e "[INFO]: Starting static library compilation\n"
@@ -53,5 +52,5 @@ echo -e "[SUCCESS]: All build tests passed\n"
 
 echo -e "[INFO]: Removing build dependencies\n"
 echo -e "[COMMAND]: sudo apt purge -y meson ninja-build pkg-config libcurl4-openssl-dev libzstd-dev libssl-dev zlib1g-dev"
-sudo apt purge -y meson ninja-build pkg-config libcurl4-openssl-dev libzstd-dev libssl-dev zlib1g-dev ||  {  echo -e "[ERROR]: Failed to remove build dependencies\n"; exit 11; }
+sudo apt purge -y meson ninja-build pkg-config libcurl4-openssl-dev libzstd-dev libssl-dev zlib1g-dev ||  {  echo -e "[ERROR]: Failed to remove build dependencies\n"; exit 10; }
 echo -e "[SUCCESS]: Removed build dependencies\n"
