@@ -1,19 +1,18 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Xml.Serialization;
 using EasyDockerFile.Core.Types.ImageTypes;
+using System.Diagnostics.CodeAnalysis;
+using System.Xml.Serialization;
+using static EasyDockerFile.Core.Common.Constants;
 
 namespace EasyDockerFile.Core.Helpers;
 
 public static class FamilyLoader 
 {
     private static readonly string ImageXMLPattern = "EasyDockerFile.Resources.Images.xml";
-    private static readonly Assembly _assembly = Assembly.GetExecutingAssembly();
 
     // Ensures all types that touch ImageFamilies are preserved, even if they arent explicitly used.
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ImageFamilies))]
-    [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026", Justification = "Roots.xml handles the preservation of these types.")]
-    [UnconditionalSuppressMessage("AotAnalysis", "IL3050", Justification = "Due to the analysis above, currently, this method is AOT safe.")]
+    // [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026", Justification = "Roots.xml handles the preservation of these types.")]
+    // [UnconditionalSuppressMessage("AotAnalysis", "IL3050", Justification = "Due to the analysis above, currently, this method is AOT safe.")]
     public static ImageFamily[] GetFamilies()
     {
         Console.WriteLine("[INFO]: Loading Base Docker images.");
