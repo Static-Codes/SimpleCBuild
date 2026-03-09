@@ -41,12 +41,12 @@
 // Console.WriteLine($"Exiting Option Selected: {familyChoice.IsExitOption()}");
 
 
-// Testing to ensure the debian package manifest functionality works as intended.
+// Testing to ensure the Debian package manifest functionality works as intended.
 // using EasyDockerFile.Core.API.PackageSearch;
 // using System.Runtime.InteropServices;
 
 // var debianPackageApi = new DebianPackageApi(Architecture.X64);
-// await debianPackageApi.InitializeManifestList();
+// await debianPackageApi.Load();
 
 // foreach (var manifest in debianPackageApi.PackageManifests) {
 //     Console.WriteLine(manifest);
@@ -54,7 +54,21 @@
 
 
 
-using EasyDockerFile.Core.Helpers;
+// // ZChunk binary loading test
+// using EasyDockerFile.Core.Helpers;
 
-var location = ZChunkLoader.Load();
-Console.WriteLine(location);
+// var location = ZChunkLoader.Load();
+// Console.WriteLine(location);
+
+
+// // Testing to ensure the Fedora package manifest functionality works as intended.
+// using EasyDockerFile.Core.API.PackageSearch;
+// using static System.Runtime.InteropServices.Architecture;
+
+// var fedoraPackageApi = new FedoraPackageApi(X64, "43");
+// await fedoraPackageApi.Load();
+// Console.WriteLine("[SUCCESS]: Loaded {0} packages", fedoraPackageApi.PackageManifests.Count);
+
+// foreach (var manifest in fedoraPackageApi.PackageManifests) {
+//     Console.WriteLine(manifest);
+// }

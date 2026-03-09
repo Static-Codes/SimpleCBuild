@@ -26,7 +26,7 @@ public class DebianPackageApi(Architecture architecture) : PackageSearchApi
     {
         Console.WriteLine("[INFO]: Downloading compressed Debian package manifest (~13MB)");
         var compressedStream = await Instance.GetStreamAsync(PackageFileUri!);
-        Console.WriteLine("[SUCCESS]: Downloaded successful");
+        Console.WriteLine("[SUCCESS]: Download successful");
         
         // Add check if 150MB of storage is free.
 
@@ -135,7 +135,7 @@ public class DebianPackageApi(Architecture architecture) : PackageSearchApi
     /// <para> Initializes <DebianPackageApi>.PackageManifests
     /// This must be called before accessing <DebianPackageApi>.PackageManifests
     /// </summary>
-    public async Task InitializeManifestList() 
+    public async Task Load() 
     {
         FileStream? manifestStream = await DownloadManifestFile();
         var readOnlyManifestBytes = await GetReadOnlyFileMemory(manifestStream);

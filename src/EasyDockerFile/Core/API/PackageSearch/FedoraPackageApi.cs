@@ -1,12 +1,15 @@
+using BrowserAutomationMaster.Core.SystemInfo.OS.Unix;
 using EasyDockerFile.Core.API.PackageSearch.Base;
 using EasyDockerFile.Core.API.PackageSearch.Manifests;
+using EasyDockerFile.Core.Common;
 using EasyDockerFile.Core.Helpers;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Serialization;
+using static EasyDockerFile.Core.Common.Constants;
+using static EasyDockerFile.Core.Common.Platform;
 using static EasyDockerFile.Core.Common.RequestManager.NetworkClient;
 using static System.Runtime.InteropServices.Architecture;
 
@@ -18,16 +21,14 @@ namespace EasyDockerFile.Core.API.PackageSearch;
 // </summary>
 public class FedoraPackageApi : PackageSearchApi 
 {
-    // public string? PlatformIdentifer;
     private readonly Task<string?> _getUriTask;
     public new string? PlatformIdentifer;
     
-    public FedoraPackageApi(Architecture architecture, string fedoraVersion, object? nullObj = null)
+    public FedoraPackageApi(Architecture architecture, string fedoraVersion)
     {
         Console.WriteLine("[INFO]: Initializing _getUriTask");
-        _getUriTask = InitializeGetUriTask(architecture, fedoraVersion);
         PlatformIdentifer = GetPlatformIdentifer(architecture);
-        Console.WriteLine("[SUCCESS]: Initialized _getUriTask");
+        _getUriTask = InitializeGetUriTask(architecture, fedoraVersion);
     }
     
     // If for some reason the Task above did not complete as intended, the quick and dirty fix is .GetAwaiter().GetResult()
@@ -38,38 +39,23 @@ public class FedoraPackageApi : PackageSearchApi
 
 
     public override string[] FallbackPackages => ["git", "curl", "wget", "nano", "vim"];
-    public List<DebianManifest> PackageManifests = [];
+    public List<FedoraPackage> PackageManifests = [];
     
 
-    private async Task<FileStream?> DownloadManifestFile() 
+    private async Task<HttpResponseMessage> GetRepoMDResponse() 
     {
-        Console.WriteLine("[INFO]: Downloading compressed Fedora package manifest (~34MB)");
-        var compressedStream = await Instance.GetStreamAsync(PackageFileUri!);
-        Console.WriteLine("[SUCCESS]: Downloaded successful");
-        
-        // Add check if 250MB of storage is free.
-
-        Console.WriteLine("[INFO]: Decompressing the compressed package manifest (~190MB)");
-        using var decompressor = new GZipStream(compressedStream, CompressionMode.Decompress);
-        var tempFile = Path.GetTempFileName();
-        FileStream? dataStream = null;
-        try {
-            dataStream = File.Create(tempFile);
-            ArgumentNullException.ThrowIfNull(dataStream, nameof(dataStream));
-        }
-        catch (Exception ex) {
-            Console.WriteLine("[WARNING]: Decompression failed");
-            Console.WriteLine($"[ERROR]: {ex.Message}");
-            Environment.Exit(1);
+        if (string.IsNullOrEmpty(PackageFileUri)) {
+            throw new InvalidOperationException("[EXCEPTION]: PackageFileUri has not been initialized.");
         }
 
+        RequestManager.NetworkClient.UpdateUserAgent("curl/8.5.0");
+        var rawResponse = await Instance.GetAsync(PackageFileUri);
+        RequestManager.NetworkClient.ResetUserAgentToDefault();
 
-        await decompressor.CopyToAsync(dataStream!, 100000);
-        Console.WriteLine("[SUCCESS]: Decompression successful");
+        ArgumentNullException.ThrowIfNull(rawResponse);
 
-        Console.WriteLine("[SUCCESS]: Reset stream position");
-        dataStream.Position = 0;
-        return dataStream;
+        rawResponse.EnsureSuccessStatusCode();
+        return rawResponse;
     }
 
     /// <summary>
@@ -104,20 +90,30 @@ public class FedoraPackageApi : PackageSearchApi
     private async Task<string?> InitializeGetUriTask(Architecture architecture, string fedoraVersion) 
     {   
         var repoDataRemoteDir = GetMetadataXMLFile(architecture, fedoraVersion);
-        Stream? repoXMLFileStream = null;
 
         try 
         {
-            var manifestXMLFile = Path.Combine(repoDataRemoteDir, "repomd.xml");
-            repoXMLFileStream = await Instance.GetStreamAsync(manifestXMLFile!);
-            XmlSerializer serializer = new XmlSerializer(typeof(RepoMD));
+            var repoMDURL = Path.Combine(repoDataRemoteDir, "repomd.xml");
+
+            RequestManager.NetworkClient.UpdateUserAgent("curl/8.5.0");
+            var repoXMLResponseMessage = await Instance.GetAsync(repoMDURL);
+            RequestManager.NetworkClient.ResetUserAgentToDefault();
+
+            ArgumentNullException.ThrowIfNull(repoXMLResponseMessage);
+            repoXMLResponseMessage.EnsureSuccessStatusCode();
+
+            var xmlBytes = await repoXMLResponseMessage.Content.ReadAsByteArrayAsync();
+            using var memoryStream = new MemoryStream(xmlBytes);
+            var serializer = new XmlSerializer(typeof(RepoMD));
             
-            ArgumentNullException.ThrowIfNull(repoXMLFileStream, nameof(repoXMLFileStream));
-            var repoXMLFileObj = (RepoMD)serializer.Deserialize(repoXMLFileStream)!;
+            ArgumentNullException.ThrowIfNull(memoryStream, nameof(memoryStream));
+
+            var repoXMLFileObj = serializer.Deserialize(memoryStream);
             ArgumentNullException.ThrowIfNull(repoXMLFileObj, nameof(repoXMLFileObj));
 
+            var repoXMLObj = (RepoMD)repoXMLFileObj;
 
-            var dataBlocks = repoXMLFileObj.Data;
+            var dataBlocks = repoXMLObj.Data;
             ArgumentNullException.ThrowIfNull(dataBlocks, nameof(dataBlocks));
 
             var desiredBlock = dataBlocks
@@ -137,7 +133,10 @@ public class FedoraPackageApi : PackageSearchApi
             ArgumentNullException.ThrowIfNull(desiredBlock.Location);
             ArgumentNullException.ThrowIfNull(desiredBlock.Location.Href);
 
-            return Path.Combine(baseUri, desiredBlock.Location.Href);
+
+            var finalPackageUri = new Uri(new Uri(baseUri), desiredBlock.Location.Href);
+            Console.WriteLine($"[SUCCESS]: Initialized _getUriTask with Uri: {finalPackageUri}");
+            return finalPackageUri.ToString();
         }
 
         catch (Exception ex) {
@@ -154,64 +153,180 @@ public class FedoraPackageApi : PackageSearchApi
     /// Initializes FedoraPackageApi.PackageManifests <br/>
     /// This must be called before accessing FedoraPackageApi.PackageManifests
     /// </summary>
-    public async Task InitializeManifestList() 
+    public async Task Load() 
     {
-        FileStream? manifestStream = await DownloadManifestFile();
+        Console.WriteLine($"[INFO]: Downloading compressed Fedora package manifest from: {PackageFileUri}");
+
+        var repoMDResponse = await GetRepoMDResponse();
+
+        var tempXmlStream = await DecompressManifest(repoMDResponse);
+
+        await ProcessManifestInChunksAsync(tempXmlStream);
     }
 
-    private async Task ParseZCKArchiveInChunksAsync(Stream compressedStream)
+    // HasExecutablePermissions and SetExecutablePermissions are unix only
+    // This CA1416 can be safely suppress as it is accounted for with the conditional below.
+    [UnconditionalSuppressMessage("Interoperability", "CA1416")]
+    private static bool SetExecutableFlag(string binaryPath) {
+        if (IsWindows) {
+            // Add actions later
+            return false;
+        } 
+        
+        if (!UnixFilePermissions.HasExecutablePermissions(binaryPath)) {
+            return UnixFilePermissions.SetExecutablePermissions(binaryPath);
+        }
+        return false;
+    }
+
+    private static async Task<FileStream> DecompressManifest(HttpResponseMessage response)
     {
-        var tempZck = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".xml.zck");
-        var tempXml = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".xml");
+        var randomFileName = Guid.NewGuid().ToString();
+        var baseFilePath = Path.Combine(TEMP_DIR, randomFileName);
+
+
+        var tempZck = baseFilePath + ".xml.zck";
+        var tempXml = baseFilePath + ".xml";
+
+
+
         var unzckBinary = ZChunkLoader.Load();
 
-        ArgumentNullException.ThrowIfNull(unzckBinary);
+        #if DEBUG
+            Console.WriteLine("[DEBUG]: Base FilePath: {0}", baseFilePath);
+            Console.WriteLine("[DEBUG]: Temp XML Path: {0}", tempXml);
+            Console.WriteLine("[DEBUG]: Temp ZCK Path: {0}", tempZck);
+            Console.WriteLine("[DEBUG]: Unzck Binary Path: {0}", unzckBinary);
+        #endif
 
+        ArgumentNullException.ThrowIfNull(unzckBinary);
+        
         try
         {
-            using (var fs = new FileStream(tempZck, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
-            {
-                await compressedStream.CopyToAsync(fs);
-            }
+            var tempZckStream = new FileStream(tempZck, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
+            var token = new CancellationTokenSource(TimeSpan.FromSeconds(20)).Token;
+            await response.Content.CopyToAsync(tempZckStream, token);
             
+            #if DEBUG
+                Console.WriteLine($"[DEBUG]: Filesize: {(double)tempZckStream!.Length / Math.Pow(1024, 2)} MiB");
+            #endif
+
+            SetExecutableFlag(unzckBinary);
             
+            // Due to the use of a direct binary invoke, it is not possible to redirect stdout to null
+            // The message below is appended to the stdout that is written to form a correct path 
+            Console.Write("[INFO]: Extracting to /tmp/");
             var startInfo = new ProcessStartInfo
             {
                 FileName = unzckBinary,
-                Arguments = $"-o \"{tempXml}\" \"{tempZck}\"",
+                Arguments = $"\"{tempZck}\"",
                 CreateNoWindow = true,
                 UseShellExecute = false,
-                RedirectStandardError = true
+                RedirectStandardError = true,
+                WorkingDirectory = TEMP_DIR
             };
 
+            // Console.WriteLine($"{unzckBinary} \"{tempZck}\"");
             using var process = Process.Start(startInfo);
             await process!.WaitForExitAsync();
 
             if (process.ExitCode != 0) {
                 throw new Exception($"unzck failed: {await process.StandardError.ReadToEndAsync()}");
             }
-            
-            
-            using (var xmlFileStream = new FileStream(tempXml, FileMode.Open, FileAccess.Read))
-            using (var reader = XmlReader.Create(xmlFileStream, new XmlReaderSettings { Async = true }))
-            {
-                while (await reader.ReadAsync())
-                {
-                    // instead of reading the entire ~190MB raw XML stream, XmlReader reads in small kilobyte chunks.
-                }
+
+            if (File.Exists(tempXml)) { 
+                return new FileStream(tempXml, FileMode.Open, FileAccess.Read);
             }
+
+        }
+
+        catch (Exception ex) {
+            Console.WriteLine("[WARNING]: Unable to decompress fedora manifest");
+            Console.WriteLine($"[ERROR TYPE]: {ex.GetType().Name}");
+            Console.WriteLine($"[ERROR]: {ex.Message}");
         }
 
         finally
         {
+            // Deleting the zchunk file now that it is extracted.
             if (File.Exists(tempZck)) { 
                 File.Delete(tempZck); 
             }
 
-            if (File.Exists(tempXml)) { 
-                File.Delete(tempXml); 
+            // Deleting the unzck binary now that the above file is deleted.
+            if (File.Exists(unzckBinary)) {
+                File.Delete(unzckBinary);
             }
+            
         }
+        Environment.Exit(1);
+        return null;
+
     }
     
+    private async Task ProcessManifestInChunksAsync(FileStream? tempXMLStream, int chunkSize = 100, int startIndex = 0)
+    {
+        if (tempXMLStream == null) {
+            throw new ArgumentNullException(nameof(tempXMLStream));
+        }
+
+        var packageSerializer = new XmlSerializer(typeof(FedoraPackage));
+        var currentChunk = new List<FedoraPackage>(chunkSize);
+
+        using var reader = XmlReader.Create(tempXMLStream, new XmlReaderSettings { Async = true });
+        try 
+        {
+            while (await reader.ReadAsync())
+            {
+                if (reader.NodeType == XmlNodeType.Element && reader.Name == "package")
+                {
+                    // Deserializing the next package
+                    using var subReader = reader.ReadSubtree();
+                    subReader.Read();
+
+                    if (packageSerializer.Deserialize(subReader) is object pkg && pkg != null)
+                    {
+                        currentChunk.Add((FedoraPackage)pkg);
+                    }   
+                    
+                    // Once the currentChunk has finished, the next x packages are loaded.
+                    if (currentChunk.Count >= chunkSize)
+                    {
+                        ProcessManifestChunk(startIndex, currentChunk);
+                        currentChunk.Clear(); // Frees memory for the next x packages
+                    }
+                }
+            }
+
+            // Includes the last partial chunk, which was left out previously.
+            if (currentChunk.Count > 0)
+            {
+                ProcessManifestChunk(startIndex, currentChunk);
+            }
+
+            if (File.Exists(tempXMLStream.Name)) { 
+                File.Delete(tempXMLStream.Name); 
+            }
+
+            Console.WriteLine("[SUCCESS]: Download successful");
+        }
+
+        catch (Exception ex) {
+            Console.WriteLine("[WARNING]: Unable to process Fedora package manifest");
+            Console.WriteLine($"[ERROR TYPE]: {ex.GetType().Name}");
+            Console.WriteLine($"[ERROR]: {ex.Message}");
+        }
+
+        finally {
+            // Disposes of the stream, which frees assocated memory, and also deletes temp files created by this stream/process
+            await tempXMLStream.DisposeAsync();
+        }
+    }
+
+    private void ProcessManifestChunk(int startIndex, List<FedoraPackage> currentChunk) 
+    {
+        var endIndex = startIndex + currentChunk.Count;
+        PackageManifests.AddRange(currentChunk);
+    }
+
 }

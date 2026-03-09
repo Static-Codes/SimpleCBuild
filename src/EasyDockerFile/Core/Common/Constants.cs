@@ -9,6 +9,7 @@ public class Constants
     public const BindingFlags _privateStaticFlag = BindingFlags.NonPublic | BindingFlags.Static;
     public const BindingFlags _publicFlag = BindingFlags.Public;
     public const BindingFlags _publicInstanceFlag = _publicFlag | BindingFlags.Instance | BindingFlags.FlattenHierarchy;
+    public readonly static string TEMP_DIR = Path.GetTempPath();
     public readonly static string NLC = Environment.NewLine;
     public const string BaseZChunkPattern = "EasyDockerFile.Resources.Utilities.unzck";
 }

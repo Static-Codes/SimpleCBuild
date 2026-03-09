@@ -2,6 +2,7 @@ using static EasyDockerFile.Core.Common.Platform;
 using static EasyDockerFile.Core.Common.Constants;
 using static EasyDockerFile.Core.Common.SessionInfo;
 using static System.Runtime.InteropServices.Architecture;
+using System;
 
 namespace EasyDockerFile.Core.Helpers;
 
@@ -32,7 +33,7 @@ public class ZChunkLoader()
             var stream = _assembly.GetManifestResourceStream(pattern);
             ArgumentNullException.ThrowIfNull(stream, nameof(stream));
 
-            var fileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var fileName = Path.Combine(TEMP_DIR, Guid.NewGuid().ToString());
             
             using var fileStream = new FileStream(fileName, FileMode.CreateNew, FileAccess.Write, FileShare.None, 4096, true);
             stream.CopyTo(fileStream);
