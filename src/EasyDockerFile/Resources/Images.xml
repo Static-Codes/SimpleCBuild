@@ -1,44 +1,42 @@
 <families>
-    <family>Debian
+  <family>Debian
         <image>
-            <version>13.2</version>
-            <full_name>Debian 13.2</full_name>
-            <supported_architectures>
-                <supported_architecture>x64</supported_architecture>
-                <supported_architecture>arm64</supported_architecture>
-                <supported_architecture>armel</supported_architecture>
-                <supported_architecture>armhf</supported_architecture>
-            </supported_architectures>
-        </image>
+      <version>13.2</version>
+      <full_name>Debian 13.2</full_name>
+      <supported_architectures>
+        <supported_architecture>x64</supported_architecture>
+        <supported_architecture>arm64</supported_architecture>
+        <supported_architecture>armel</supported_architecture>
+        <supported_architecture>armhf</supported_architecture>
+      </supported_architectures>
+    </image>
+    <image>
+      <version>13.3</version>
+      <full_name>Debian 13.3</full_name>
+      <supported_architectures>
+        <supported_architecture>x64</supported_architecture>
+        <supported_architecture>arm64</supported_architecture>
+        <supported_architecture>armel</supported_architecture>
+        <supported_architecture>armhf</supported_architecture>
+      </supported_architectures>
+    </image>
+  </family>
+  <family>Fedora
         <image>
-            <version>13.3</version>
-            <full_name>Debian 13.3</full_name>
-            <supported_architectures>
-                <supported_architecture>x64</supported_architecture>
-                <supported_architecture>arm64</supported_architecture>
-                <supported_architecture>armel</supported_architecture>
-                <supported_architecture>armhf</supported_architecture>
-            </supported_architectures>
-        </image>
-    </family> 
-
-    
-    <family>Fedora
-        <image>
-            <version>43.0</version>
-            <full_name>Fedora 43.0</full_name>
-            <supported_architectures>
-                <supported_architecture>arm64</supported_architecture>
-                <supported_architecture>x64</supported_architecture>
-            </supported_architectures>
-        </image>
-        <image>
-            <version>42.0</version>
-            <full_name>Fedora 42.0</full_name>
-            <supported_architectures>
-                <supported_architecture>arm64</supported_architecture>
-                <supported_architecture>x64</supported_architecture>
-            </supported_architectures>
-        </image>
-    </family> 
+      <version>43.0</version>
+      <full_name>Fedora 43.0</full_name>
+      <supported_architectures>
+        <supported_architecture>arm64</supported_architecture>
+        <supported_architecture>x64</supported_architecture>
+      </supported_architectures>
+    </image>
+    <image>
+      <version>42.0</version>
+      <full_name>Fedora 42.0</full_name>
+      <supported_architectures>
+        <supported_architecture>arm64</supported_architecture>
+        <supported_architecture>x64</supported_architecture>
+      </supported_architectures>
+    </image>
+  </family>
 </families>
