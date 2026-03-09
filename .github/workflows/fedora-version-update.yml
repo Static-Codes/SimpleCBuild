@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Entering repository root
         uses: actions/checkout@v4
+        with:
+          path: '.' # This fixes issues with checking out to a subdirectory instead of the root dir
 
       - name: Setting up Python
         uses: actions/setup-python@v5
