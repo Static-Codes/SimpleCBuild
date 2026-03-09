@@ -9,9 +9,9 @@ public class Image
 {
     // Parameterless constructor for XmlSerializer
     public Image() { }
-
+    
     [XmlElement("full_name")]
-    public required string? FullName { get; set; }
+    public required string FullName { get; set; }
 
     [XmlElement("version")]
     public required string Version { get; set; }

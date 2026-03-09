@@ -1,6 +1,6 @@
 <families>
   <family>Debian
-        <image>
+    <image>
       <version>13.2</version>
       <full_name>Debian 13.2</full_name>
       <supported_architectures>
@@ -22,7 +22,7 @@
     </image>
   </family>
   <family>Fedora
-        <image>
+    <image>
       <version>43.0</version>
       <full_name>Fedora 43.0</full_name>
       <supported_architectures>

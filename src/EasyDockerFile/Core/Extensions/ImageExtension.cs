@@ -28,5 +28,4 @@ public static class ImageExtension
             .Where(image => image.FullName == imageName)
             .FirstOrDefault();
     }
-    
 }
