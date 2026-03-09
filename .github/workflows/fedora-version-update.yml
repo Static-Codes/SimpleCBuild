@@ -13,10 +13,10 @@ jobs:
   update-xml:
     runs-on: ubuntu-latest
     env:
-      IMAGES_XML_PATH: "EasyDockerFile/Resources/Images.xml"
-      SCRIPT_PATH: "EasyDockerFile/Resources/Maintenance/fedora-version-update.py"
+      IMAGES_XML_PATH: "Resources/Images.xml"
+      SCRIPT_PATH: "Resources/Maintenance/fedora-version-update.py"
     steps:
-      - name: Checking out on the repository
+      - name: Entering repository root
         uses: actions/checkout@v4
 
       - name: Setting up Python
