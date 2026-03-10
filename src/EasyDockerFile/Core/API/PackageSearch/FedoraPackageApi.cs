@@ -1,4 +1,3 @@
-using BrowserAutomationMaster.Core.SystemInfo.OS.Unix;
 using EasyDockerFile.Core.API.PackageSearch.Base;
 using EasyDockerFile.Core.API.PackageSearch.Manifests;
 using EasyDockerFile.Core.Common;
@@ -7,7 +6,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Xml;
-using System.Xml.Serialization;
+using System.Xml.Linq;
 using static EasyDockerFile.Core.Common.Constants;
 using static EasyDockerFile.Core.Common.Platform;
 using static EasyDockerFile.Core.Common.RequestManager.NetworkClient;
@@ -95,23 +94,27 @@ public class FedoraPackageApi : PackageSearchApi
         {
             var repoMDURL = Path.Combine(repoDataRemoteDir, "repomd.xml");
 
-            RequestManager.NetworkClient.UpdateUserAgent("curl/8.5.0");
+            UpdateUserAgent("curl/8.5.0");
             var repoXMLResponseMessage = await Instance.GetAsync(repoMDURL);
-            RequestManager.NetworkClient.ResetUserAgentToDefault();
+            ResetUserAgentToDefault();
 
             ArgumentNullException.ThrowIfNull(repoXMLResponseMessage);
             repoXMLResponseMessage.EnsureSuccessStatusCode();
 
             var xmlBytes = await repoXMLResponseMessage.Content.ReadAsByteArrayAsync();
             using var memoryStream = new MemoryStream(xmlBytes);
-            var serializer = new XmlSerializer(typeof(RepoMD));
+            // var serializer = new XmlSerializer(typeof(RepoMD));
             
             ArgumentNullException.ThrowIfNull(memoryStream, nameof(memoryStream));
+            
+            var doc = XDocument.Load(memoryStream);
 
-            var repoXMLFileObj = serializer.Deserialize(memoryStream);
-            ArgumentNullException.ThrowIfNull(repoXMLFileObj, nameof(repoXMLFileObj));
+            var repoXMLObj = FedoraXmlMapper.MapRepoMD(doc);
 
-            var repoXMLObj = (RepoMD)repoXMLFileObj;
+            // var repoXMLFileObj = serializer.Deserialize(memoryStream);
+            // ArgumentNullException.ThrowIfNull(repoXMLFileObj, nameof(repoXMLFileObj));
+
+            // var repoXMLObj = (RepoMD)repoXMLFileObj;
 
             var dataBlocks = repoXMLObj.Data;
             ArgumentNullException.ThrowIfNull(dataBlocks, nameof(dataBlocks));
@@ -264,13 +267,14 @@ public class FedoraPackageApi : PackageSearchApi
 
     }
     
-    private async Task ProcessManifestInChunksAsync(FileStream? tempXMLStream, int chunkSize = 100, int startIndex = 0)
+    private async Task ProcessManifestInChunksAsync(FileStream? tempXMLStream, int chunkSize = 100)
     {
-        if (tempXMLStream == null) {
-            throw new ArgumentNullException(nameof(tempXMLStream));
+        ArgumentNullException.ThrowIfNull(tempXMLStream);
+
+        if (tempXMLStream.CanSeek) {
+            tempXMLStream.Position = 0;
         }
 
-        var packageSerializer = new XmlSerializer(typeof(FedoraPackage));
         var currentChunk = new List<FedoraPackage>(chunkSize);
 
         using var reader = XmlReader.Create(tempXMLStream, new XmlReaderSettings { Async = true });
@@ -280,19 +284,19 @@ public class FedoraPackageApi : PackageSearchApi
             {
                 if (reader.NodeType == XmlNodeType.Element && reader.Name == "package")
                 {
-                    // Deserializing the next package
-                    using var subReader = reader.ReadSubtree();
-                    subReader.Read();
+                    // Deserializing the entire package object
+                    var el = (XElement)XNode.ReadFrom(reader);
 
-                    if (packageSerializer.Deserialize(subReader) is object pkg && pkg != null)
-                    {
-                        currentChunk.Add((FedoraPackage)pkg);
-                    }   
+                    var pkg = FedoraXmlMapper.MapPackage(el);
+
+                    if (pkg != null) {
+                        currentChunk.Add(pkg);
+                    }
                     
                     // Once the currentChunk has finished, the next x packages are loaded.
                     if (currentChunk.Count >= chunkSize)
                     {
-                        ProcessManifestChunk(startIndex, currentChunk);
+                        ProcessManifestChunk(currentChunk);
                         currentChunk.Clear(); // Frees memory for the next x packages
                     }
                 }
@@ -301,7 +305,7 @@ public class FedoraPackageApi : PackageSearchApi
             // Includes the last partial chunk, which was left out previously.
             if (currentChunk.Count > 0)
             {
-                ProcessManifestChunk(startIndex, currentChunk);
+                ProcessManifestChunk(currentChunk);
             }
 
             if (File.Exists(tempXMLStream.Name)) { 
@@ -323,9 +327,8 @@ public class FedoraPackageApi : PackageSearchApi
         }
     }
 
-    private void ProcessManifestChunk(int startIndex, List<FedoraPackage> currentChunk) 
+    private void ProcessManifestChunk(List<FedoraPackage> currentChunk) 
     {
-        var endIndex = startIndex + currentChunk.Count;
         PackageManifests.AddRange(currentChunk);
     }
 

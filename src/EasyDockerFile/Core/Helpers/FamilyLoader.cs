@@ -1,6 +1,6 @@
 using EasyDockerFile.Core.Types.ImageTypes;
 using System.Diagnostics.CodeAnalysis;
-using System.Xml.Serialization;
+using System.Xml.Linq;
 using static EasyDockerFile.Core.Common.Constants;
 
 namespace EasyDockerFile.Core.Helpers;
@@ -17,8 +17,6 @@ public static class FamilyLoader
     {
         Console.WriteLine("[INFO]: Loading Base Docker images.");
 
-        var serializer = new XmlSerializer(typeof(ImageFamilies));
-
         using var stream = _assembly.GetManifestResourceStream(ImageXMLPattern);
 
         if (stream == null)
@@ -27,7 +25,9 @@ public static class FamilyLoader
             Environment.Exit(1);
         }
 
-        var familiesObj = (ImageFamilies)serializer.Deserialize(stream)!;
+        var doc = XDocument.Load(stream);
+        var familiesObj = FedoraXmlMapper.MapImageFamilies(doc);
+
         var families = familiesObj.SupportedFamilies;
 
         if (families == null || families.Length == 0)
