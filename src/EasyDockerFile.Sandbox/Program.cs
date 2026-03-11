@@ -75,3 +75,29 @@
 //     Console.WriteLine(manifest);
 // }
 #endregion
+
+#region Testing RepoInfo
+
+using EasyDockerFile.Core.API.ToolchainSearch.Git;
+using EasyDockerFile.Core.Types.GitTypes;
+using Octokit;
+
+// public repo test
+// var repoInfoObj = new RepoInfo("https://github.com/Static-Codes/BrowserAutomationMaster");
+
+// private repo test
+var repoInfoObj = new RepoInfo("https://github.com/Static-Codes/bamm-install-hosted", args);
+
+// invalid repo test
+// var repoInfoObj = new RepoInfo("https://github.com/Static-Codes/BrowserAutomationMasterxcv");
+
+
+var client = new RepoClient(repoInfoObj);
+// Currently commented as the private repo fetch logic has not been implemented.
+// await client.UpdateBranchesAsync();
+client.UpdateStatus();
+Console.WriteLine(client);
+
+#endregion
+
+
