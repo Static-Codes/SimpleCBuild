@@ -1,7 +1,6 @@
 using EasyDockerFile.Core.API.PackageSearch.Base;
 using EasyDockerFile.Core.API.PackageSearch.Manifests;
-using EasyDockerFile.Core.Common;
-using EasyDockerFile.Core.Helpers;
+using EasyDockerFile.Core.Loaders;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
@@ -47,9 +46,9 @@ public class FedoraPackageApi : PackageSearchApi
             throw new InvalidOperationException("[EXCEPTION]: PackageFileUri has not been initialized.");
         }
 
-        RequestManager.NetworkClient.UpdateUserAgent("curl/8.5.0");
+        UpdateUserAgent("curl/8.5.0");
         var rawResponse = await Instance.GetAsync(PackageFileUri);
-        RequestManager.NetworkClient.ResetUserAgentToDefault();
+        ResetUserAgentToDefault();
 
         ArgumentNullException.ThrowIfNull(rawResponse);
 
