@@ -25,8 +25,14 @@ public class RepoUrl
         return $"{Protocol}://{Domain}/{Username}/{RepoName}";
     }
 
-    public static RepoUrl Build(string repoURL) 
+    public static RepoUrl Build(string? repoURL) 
     {
+        if (repoURL == null) {
+            Console.WriteLine("[WARNING]: Unable to build System.Uri object");
+            Console.WriteLine($"[ERROR]: repoURL is null in RepoUrl.Build(...)");
+            Environment.Exit(1);
+        }
+
         Uri? uri = null;
         try {
             uri = new Uri(repoURL);

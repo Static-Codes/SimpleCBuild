@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+using EasyDockerFile.Core.Common.Commands;
 using EasyDockerFile.Core.Extensions;
 using Octokit;
 
@@ -11,11 +13,11 @@ public enum RepoStatus
     NotSet = 3,
 }
 
-public class RepoInfo(string repoURL, string[] args)
+public class RepoInfo(MainMenuSettings settings)
 {
-    public RepoUrl RepoUrlObj = RepoUrl.Build(repoURL);
-    public RepoStatus Status = args.Contains("--private") ? RepoStatus.Private : RepoStatus.NotSet;
-    public Credentials? Authentication = GetTokenFromArgs(args) is string token 
+    public RepoUrl RepoUrlObj = RepoUrl.Build(settings.RepoLink);
+    public RepoStatus Status = settings.PrivateFlagSet ? RepoStatus.Private : RepoStatus.NotSet;
+    public Credentials? Authentication = settings.OAuthToken is string token 
         ? new Credentials(token, AuthenticationType.Oauth) 
         : null;
     public User? UserInfo = null;
@@ -23,14 +25,6 @@ public class RepoInfo(string repoURL, string[] args)
     public bool IsPrivate => Status == RepoStatus.Private;
     public bool IsValid => Status != RepoStatus.NotFound && Status != RepoStatus.NotSet;
     public bool RequiresAuth => Authentication != null && this.GetOAuthToken() != null;
-    
-
-    private static string? GetTokenFromArgs(string[] args) {
-        return args
-              .Where(arg => arg.StartsWith("--token="))
-              .Select(arg => arg.Replace("--token=", ""))
-              .FirstOrDefault();
-    }
 }
 
 

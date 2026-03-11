@@ -3,6 +3,7 @@ namespace EasyDockerFile.Core.API.ToolchainSearch.Git;
 using EasyDockerFile.Core.Extensions;
 using EasyDockerFile.Core.Types.GitTypes;
 using Octokit;
+using Spectre.Console;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,30 +12,58 @@ public class RepoClient
 {
     private readonly GitHubClient _client;
     private readonly RepoInfo _repoInfo;
-    private readonly ApiInfo apiInfo;
+    private ApiInfo? _apiInfo;
 
-    public RepoClient(RepoInfo repoInfoObj)
+    private RepoClient(GitHubClient client, RepoInfo repoInfo)
     {
-        _repoInfo = repoInfoObj;
-
-        _client = new GitHubClient(new ProductHeaderValue(_repoInfo.RepoUrlObj.RepoName));
-
-        if (_repoInfo.RequiresAuth) {
-            _client.Credentials = _repoInfo.Authentication;
-
-            // This needs improvement, async calls should not called on a blocking thread
-            _repoInfo.UserInfo = _client.User.Current().GetAwaiter().GetResult();
-        }
-        apiInfo = _client.GetLastApiInfo();
+        _client = client;
+        _repoInfo = repoInfo;
     }
 
-    private bool BranchesFound() {
-        return _repoInfo.BranchNames.Any();
+    private static RepoClient RunCreationHelper(GitHubClient client, RepoInfo repoInfo)
+    {
+        var repoClient = new RepoClient(client, repoInfo);
+        
+        // Attempting to capture the last api request info, or silently exiting as a null value will be handled externally.
+        try {
+            repoClient._apiInfo = client.GetLastApiInfo();
+        } 
+        catch {
+            
+        }
+        return repoClient;
+    }
+    public static async Task<RepoClient> CreateAsync(RepoInfo repoInfo)
+    {
+        var gitClient = new GitHubClient(new ProductHeaderValue(repoInfo.RepoUrlObj.RepoName));
+        RepoClient? client;
+
+        if (!repoInfo.RequiresAuth) {
+            return RunCreationHelper(gitClient, repoInfo);
+        }
+        
+        // At this point RequiresAuth is guaranteed to be true.
+        if (repoInfo.Authentication != null)
+        {
+            gitClient.Credentials = repoInfo.Authentication;
+            repoInfo.UserInfo = await gitClient.User.Current();
+            client = RunCreationHelper(gitClient, repoInfo);
+        }
+
+        else {
+            client = null;
+            var eMessage = Markup.Escape("[ERROR]: The specified repository requires an OAuth Token to access.");
+            AnsiConsole.MarkupLine($"[red]{eMessage}[/]");
+            Console.WriteLine("[INFO]: Please include an OAuth Token in your command.");
+            Console.WriteLine("[INFO]: Use the --help flag for more information.");
+            Environment.Exit(1);
+        }
+        return client!;
     }
 
     public (bool IsRateLimited, Tuple<int, int, DateTimeOffset>? RateLimitInfo) GetRateLimitInfo()
     {
-        var rateLimit = apiInfo?.RateLimit;
+        var rateLimit = _apiInfo?.RateLimit;
 
         if (rateLimit == null)
         {
@@ -60,6 +89,13 @@ public class RepoClient
             Environment.Exit(1);
         }
         IReadOnlyList<Branch> branchesObj = [];
+
+        if (_repoInfo == null) {
+            Console.WriteLine("[WARNING]: Unable to locate a repository at the provided uri.");
+            Console.WriteLine("[ERROR]: _repoInfo is null in UpdateBranchesAsync()");
+            Environment.Exit(1);
+        }
+
         try {
             branchesObj = await _client.Repository.Branch.GetAll(
                 _repoInfo.RepoUrlObj.Username,
@@ -80,7 +116,16 @@ public class RepoClient
     }
     
     public void UpdateStatus() {
-        _repoInfo.Status = BranchesFound() ? RepoStatus.Public : _repoInfo.Status; 
+
+        if (_repoInfo == null) {
+            Console.WriteLine("[INFO]: _repoInfo is null, skipping _client.UpdateStatus()");
+            return;
+        }
+        bool branchesExist = _repoInfo.BranchNames.Any();
+
+        if (_repoInfo.Status == RepoStatus.NotSet) {
+            _repoInfo.Status = branchesExist ? RepoStatus.Public : RepoStatus.NotFound;
+        }
     }
 
 
@@ -99,7 +144,7 @@ public class RepoClient
         -----------------------------------
         - Authentication: 
             - Is Set: {_repoInfo.Authentication != null}
-            - OAuth Token: {_repoInfo.Authentication.GetToken()}
+            - OAuth Token: {_repoInfo.Authentication?.GetToken() ?? "Not Set"}
         -----------------------------------
         - User Info:
             - Is Authenticated: {_repoInfo.UserInfo != null}
