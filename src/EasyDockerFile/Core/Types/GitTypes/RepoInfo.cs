@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using EasyDockerFile.Core.Common.Commands;
 using EasyDockerFile.Core.Extensions;
 using Octokit;
@@ -22,6 +21,8 @@ public class RepoInfo(MainMenuSettings settings)
         : null;
     public User? UserInfo = null;
     public IEnumerable<string> BranchNames { get; set; } = [];
+    public string? SelectedBranchName { get; set; } = null;
+    public IEnumerable<string> FilePaths { get; set; } = [];
     public bool IsPrivate => Status == RepoStatus.Private;
     public bool IsValid => Status != RepoStatus.NotFound && Status != RepoStatus.NotSet;
     public bool RequiresAuth => Authentication != null && this.GetOAuthToken() != null;

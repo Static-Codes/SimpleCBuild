@@ -1,6 +1,7 @@
 namespace EasyDockerFile.Core.Types.GitTypes;
 
 using EasyDockerFile.Core.Extensions;
+using EasyDockerFile.Core.Helpers;
 using Octokit;
 using Spectre.Console;
 using System;
@@ -19,40 +20,6 @@ public class RepoClient
         _repoInfo = repoInfo;
     }
 
-    public async Task<List<string>> GetFlattenedFileList(string owner, string repoName)
-    {
-        var files = new List<string>();
-        await GetFilesRecursivelyAsync(owner, repoName, files);
-        return files;
-    }
-
-    private async Task GetFilesRecursivelyAsync(string owner, string repoName, List<string> files, string path = ".")
-    {   
-        try 
-        {
-            var contents = await _client.Repository.Content.GetAllContents(owner, repoName, path);
-            
-            foreach (var content in contents)
-            {
-                if (content.Type == ContentType.File) {
-                    files.Add(content.Path);
-                }
-
-                else if (content.Type == ContentType.Dir) {
-                    await GetFilesRecursivelyAsync(owner, repoName, files, content.Path);
-                }
-            }
-        }
-        
-        catch (Exception ex) {
-            var eMessage = Markup.Escape($"[ERROR]: {ex.Message}.");
-            AnsiConsole.MarkupLine($"[red]{eMessage}[/]");
-            Console.WriteLine("[INFO]: Use the --help flag for more information.");
-            Environment.Exit(1);
-        }
-    }
-
-    
     public static async Task<RepoClient> CreateAsync(RepoInfo repoInfo)
     {
         var gitClient = new GitHubClient(new ProductHeaderValue(repoInfo.RepoUrlObj.RepoName));
@@ -81,6 +48,50 @@ public class RepoClient
         return client!;
     }
 
+    private async Task<IEnumerable<string>> GetFlattenedFileList(string owner, string repoName, string branchName)
+    {
+        var files = new List<string>();
+        await GetFilesRecursivelyAsync(owner, repoName, files, branchName);
+        return files;
+    }
+
+    private async Task GetFilesRecursivelyAsync(string owner, string repoName, List<string> files, string branchName, string path = ".") 
+    {   
+        try 
+        {
+            var contents = await _client.Repository.Content.GetAllContentsByRef(owner, repoName, path, branchName);
+            
+            foreach (var content in contents)
+            {
+                if (content.Type == ContentType.File) {
+                    files.Add(content.Path);
+                }
+
+                else if (content.Type == ContentType.Dir) {
+                    await GetFilesRecursivelyAsync(owner, repoName, files, branchName, content.Path);
+                }
+            }
+        }
+
+        catch (NotFoundException ex) 
+        {
+            Console.WriteLine($"[ERROR]: Branch not found: {ex.Message}");
+            Environment.Exit(1);
+        }
+        
+        catch (Exception ex) {
+            var eMessage = Markup.Escape($"[ERROR]: {ex.Message}.");
+            AnsiConsole.MarkupLine($"[red]{eMessage}[/]");
+            
+            if (ex.Message.StartsWith("API rate limit exceeded")) {
+                Console.WriteLine("[INFO]: https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api");
+            }
+            
+            Console.WriteLine("[INFO]: Use the --help flag for more information.");
+            Environment.Exit(1);
+        }
+    }
+
     public (bool IsRateLimited, Tuple<int, int, DateTimeOffset>? RateLimitInfo) GetRateLimitInfo()
     {
         var rateLimit = _apiInfo?.RateLimit;
@@ -97,6 +108,20 @@ public class RepoClient
         );
 
         return (true, rateLimitInfo);
+    }
+  
+    private static RepoClient RunCreationHelper(GitHubClient client, RepoInfo repoInfo)
+    {
+        var repoClient = new RepoClient(client, repoInfo);
+        
+        // Attempting to capture the last api request info, or silently exiting as a null value will be handled externally.
+        try {
+            repoClient._apiInfo = client.GetLastApiInfo();
+        } 
+        catch {
+            
+        }
+        return repoClient;
     }
 
     public async Task UpdateBranchesAsync()
@@ -133,20 +158,65 @@ public class RepoClient
         }
 
         _repoInfo.BranchNames = branchesObj.Select(branch => branch.Name) ?? [];
+
+        _repoInfo.SelectedBranchName = InputHelper.AskForInput(
+            message: "Please select a branch to use from the list below.", 
+            options: _repoInfo.BranchNames
+        );
     }
-    
-    private static RepoClient RunCreationHelper(GitHubClient client, RepoInfo repoInfo)
-    {
-        var repoClient = new RepoClient(client, repoInfo);
-        
-        // Attempting to capture the last api request info, or silently exiting as a null value will be handled externally.
-        try {
-            repoClient._apiInfo = client.GetLastApiInfo();
-        } 
-        catch {
-            
+
+    public async Task UpdateFileNamesAsync() {
+
+        if (_repoInfo?.RepoUrlObj?.Username == null) {
+            Console.WriteLine("[WARNING]: Unable to retrieve the contents of the repository at the provided uri.");
+            Console.WriteLine("[ERROR]: '_repoInfo.RepoUrlObj.Username' is null in UpdateFileNamesAsync()");
+            Environment.Exit(1);
         }
-        return repoClient;
+
+        if (_repoInfo?.RepoUrlObj?.RepoName == null) {
+            Console.WriteLine("[WARNING]: Unable to the contents of the repository at the provided uri.");
+            Console.WriteLine("[ERROR]: Variable '_repoInfo.RepoUrlObj.RepoName' is null in UpdateFileNamesAsync()");
+            Environment.Exit(1);
+        }
+
+        if (_repoInfo?.SelectedBranchName == null) {
+            Console.WriteLine("[WARNING]: Unable to the contents of the repository at the provided uri.");
+            Console.WriteLine("[ERROR]: Variable '_repoInfo.SelectedBranchName' is null in UpdateFileNamesAsync()");
+            Environment.Exit(1);
+        }
+
+        string branchToUse = _repoInfo.SelectedBranchName;
+
+        try 
+        {
+            var repo = await _client.Repository.Get(
+                _repoInfo.RepoUrlObj.Username, 
+                _repoInfo.RepoUrlObj.RepoName
+            );
+            
+            // If the user hasn't specified a branch, a fallback to the DefaultBranch is the solution.
+            if (string.IsNullOrEmpty(branchToUse)) {
+                branchToUse = repo.DefaultBranch;
+            }
+        }
+        catch (NotFoundException) 
+        {
+            Console.WriteLine("[ERROR]: Branch not found.");
+            Environment.Exit(1);
+        }
+
+        var filePaths = await GetFlattenedFileList(
+            _repoInfo.RepoUrlObj.Username, 
+            _repoInfo.RepoUrlObj.RepoName, 
+            $"refs/heads/{_repoInfo.SelectedBranchName}");
+
+        if (!filePaths.Any()) {
+            Console.WriteLine("[WARNING]: Unable to the contents of the repository at the provided uri.");
+            Console.WriteLine("[ERROR]: Variable 'filePaths' is empty in UpdateFileNamesAsync()");
+            Environment.Exit(1);
+        }
+
+        _repoInfo.FilePaths = filePaths;
     }
 
     public void UpdateStatus() {
@@ -162,8 +232,6 @@ public class RepoClient
         }
     }
 
-
-
     public override string ToString()
     {
         return $"""
@@ -175,6 +243,12 @@ public class RepoClient
             - RepoName: {_repoInfo.RepoUrlObj.RepoName}
         -----------------------------------
         - Status: {_repoInfo.Status}
+        -----------------------------------
+        - Repo Is Private: {_repoInfo.IsPrivate}
+        -----------------------------------
+        - Repo Requires Auth: {_repoInfo.RequiresAuth}
+        -----------------------------------
+        - Url Is Valid: {_repoInfo.IsValid}
         -----------------------------------
         - Authentication: 
             - Is Set: {_repoInfo.Authentication != null}
@@ -188,11 +262,10 @@ public class RepoClient
         - Branches:
             {_repoInfo.BranchNames.AsPrettyPrintedBranchString()}
         -----------------------------------
-        - Is Private: {_repoInfo.IsPrivate}
+        - Selected Branch: {_repoInfo.SelectedBranchName ?? "Not Selected"}    
         -----------------------------------
-        - Is Valid: {_repoInfo.IsValid}
-        -----------------------------------
-        - RequiresAuth: {_repoInfo.RequiresAuth}
+        - Files in Branch:
+            {_repoInfo.FilePaths.AsPrettyPrintedPathList()}
         """;
     }
 }

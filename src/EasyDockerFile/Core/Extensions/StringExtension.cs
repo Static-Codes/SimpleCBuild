@@ -19,4 +19,12 @@ public static class StringExtension
 
         return $"- {string.Join($"{NLC}    - ", branchNames)}";
     }
+
+    public static string AsPrettyPrintedPathList(this IEnumerable<string> filePaths) {
+        if (!filePaths.Any()) {
+            return $"- Unable to resolve, please check your selected branch above.";
+        }
+
+        return $"- {string.Join($"{NLC}    - ", filePaths)}";
+    }
 }
