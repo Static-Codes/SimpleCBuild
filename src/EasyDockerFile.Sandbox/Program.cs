@@ -78,25 +78,50 @@
 
 #region Testing RepoInfo
 
-using EasyDockerFile.Core.API.ToolchainSearch.Git;
-using EasyDockerFile.Core.Types.GitTypes;
-using Octokit;
+// using EasyDockerFile.Core.API.ToolchainSearch.Git;
+// using EasyDockerFile.Core.Types.GitTypes;
 
-// public repo test
-// var repoInfoObj = new RepoInfo("https://github.com/Static-Codes/BrowserAutomationMaster");
+// // public repo test
+// // var repoInfoObj = new RepoInfo("https://github.com/Static-Codes/BrowserAutomationMaster");
 
-// private repo test
-var repoInfoObj = new RepoInfo("https://github.com/Static-Codes/bamm-install-hosted", args);
+// // private repo test
+// var repoInfoObj = new RepoInfo("https://github.com/Static-Codes/bamm-install-hosted", args);
 
-// invalid repo test
-// var repoInfoObj = new RepoInfo("https://github.com/Static-Codes/BrowserAutomationMasterxcv");
+// // invalid repo test
+// // var repoInfoObj = new RepoInfo("https://github.com/Static-Codes/BrowserAutomationMasterxcv");
 
 
-var client = new RepoClient(repoInfoObj);
-// Currently commented as the private repo fetch logic has not been implemented.
+// var client = new RepoClient(repoInfoObj);
 // await client.UpdateBranchesAsync();
-client.UpdateStatus();
-Console.WriteLine(client);
+// client.UpdateStatus();
+// Console.WriteLine(client);
+
+#endregion
+
+
+#region Testing CLI Commands
+
+using EasyDockerFile.Core.Common.Commands;
+using Spectre.Console;
+using Spectre.Console.Cli;
+
+var app = new CommandApp<MainMenuCommand>();
+
+var cancellationTokenSource = new CancellationTokenSource();
+  
+Console.CancelKeyPress += (_, e) =>
+{
+    e.Cancel = true; // Preventing the process from terminating immediately
+    cancellationTokenSource.Cancel();
+    AnsiConsole.WriteLine("[red]Cancellation requested...[/]");
+};
+
+app.Configure(config =>
+{
+    config.SetApplicationName("EasyDockerFile");
+});
+
+return await app.RunAsync(args, cancellationTokenSource.Token);
 
 #endregion
 

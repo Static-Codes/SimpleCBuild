@@ -7,10 +7,26 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <InvariantGlobalization>true</InvariantGlobalization>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <UseNativeXmlSerialization>true</UseNativeXmlSerialization>
     <PublishSingleFile>true</PublishSingleFile>		
 		<SelfContained>true</SelfContained>
-    <PublishAOT>true</PublishAOT>
+
+
+    <TrimMode>full</TrimMode>
+    <StackTraceSupport>false</StackTraceSupport>
+    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+    <UseSizeOptimizedLinq>true</UseSizeOptimizedLinq>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <TrimmerRemoveSymbols>true</TrimmerRemoveSymbols>
+    <DebuggerSupport>false</DebuggerSupport>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <!-- <PublishAOT>true</PublishAOT> -->
 
 		<Authors>Static-Codes</Authors>
 		<Copyright>Copyright © Static-Codes</Copyright>
