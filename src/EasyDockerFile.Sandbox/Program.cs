@@ -101,27 +101,34 @@
 
 #region Testing CLI Commands
 
-using EasyDockerFile.Core.Common.Commands;
-using Spectre.Console;
-using Spectre.Console.Cli;
+// using EasyDockerFile.Core.Common.Commands;
+// using Spectre.Console;
+// using Spectre.Console.Cli;
 
-var app = new CommandApp<MainMenuCommand>();
+// var app = new CommandApp<MainMenuCommand>();
 
-var cancellationTokenSource = new CancellationTokenSource();
+// var cancellationTokenSource = new CancellationTokenSource();
   
-Console.CancelKeyPress += (_, e) =>
-{
-    e.Cancel = true; // Preventing the process from terminating immediately
-    cancellationTokenSource.Cancel();
-    AnsiConsole.WriteLine("[red]Cancellation requested...[/]");
-};
+// Console.CancelKeyPress += (_, e) =>
+// {
+//     e.Cancel = true; // Preventing the process from terminating immediately
+//     cancellationTokenSource.Cancel();
+//     AnsiConsole.WriteLine("[red]Cancellation requested...[/]");
+//     Environment.Exit(1);
+// };
 
-app.Configure(config =>
-{
-    config.SetApplicationName("EasyDockerFile");
-});
+// app.Configure(config =>
+// {
+//     config.SetApplicationName("EasyDockerFile");
+// });
 
-return await app.RunAsync(args, cancellationTokenSource.Token);
+// return await app.RunAsync(args, cancellationTokenSource.Token);
+#endregion
+
+#region "Ongoing tests for meson.build parsing.
+using EasyDockerFile.Core.API.RepoParser.BuildSystem.Meson;
+
+Functions.ParseMesonBuildFile("/home/nerdy/Downloads/meson.build");
 
 #endregion
 
