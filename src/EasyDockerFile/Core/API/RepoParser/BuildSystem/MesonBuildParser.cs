@@ -1,70 +1,10 @@
-using System.Text;
+using EasyDockerFile.Core.Types.BuildTypes.Meson;
 using System.Text.RegularExpressions;
-using static EasyDockerFile.Core.Common.Constants;
+using static EasyDockerFile.Core.Types.BuildTypes.Meson.MesonRegex;
 
-namespace EasyDockerFile.Core.API.RepoParser.BuildSystem.Meson;
+namespace EasyDockerFile.Core.API.RepoParser.BuildSystem;
 
-public static partial class MesonRegex
-{
-    [GeneratedRegex(
-        pattern:
-        @"project\(\s*'(?<project_name>.*)', " +
-        @"'(?<project_language>.*)',\s*" +
-        @"version : '(?<project_version>.*)',\s*" +
-        @"meson_version : '(?<meson_version>.*)',\s*" +
-        @"default_options : (?<build_arguments>\['.*'])", 
-        options: RegexOptions.IgnoreCase,
-        cultureName: "en-US"
-    )]
-    public static partial Regex MesonProjectObjectRegex { get; }
-
-    [GeneratedRegex(@"'(?<val>.*?)'")]
-    public static partial Regex GetArrayValueRegex { get; }
-
-    [GeneratedRegex(@"project\s*\((?<content>.*?)\)", RegexOptions.Singleline)]
-    public static partial Regex GetProjectBlock { get; }
-
-    [GeneratedRegex(@"^\s*'(?<name>.*?)'\s*,\s*'(?<lang>.*?)'")]
-    public static partial Regex GetProjectNameAndLanguage { get; }
-}
-
-public class MesonProjectBlock
-{
-    public string? ProjectName;
-    public string? ProjectLanguage;
-    public string? ProjectVersion;
-    public string? MesonVersion;
-    public string[]? DefaultOptions;
-
-    public override string ToString()
-    {
-        var fields = GetType().GetFields(_publicInstanceFlag);
-        var stringBuilder = new StringBuilder();
-        foreach (var field in fields) 
-        {
-            if (field.FieldType == typeof(string)) {
-                stringBuilder.AppendLine($"{field.Name}: {field.GetValue(this)}");
-            }
-
-            if (field.FieldType == typeof(string[])) {
-                stringBuilder.AppendLine($"{field.Name}");
-                var arrayMembersObj = field.GetValue(this);
-
-                ArgumentNullException.ThrowIfNull(arrayMembersObj, nameof(arrayMembersObj));
-
-                var arrayMembers = (string[])arrayMembersObj;
-
-                foreach (string member in arrayMembers) {
-                    stringBuilder.AppendLine($"\t- {member}");
-                }
-            }
-        }
-        return stringBuilder.ToString();
-    }
-
-}
-
-public partial class MesonProjectFunctions 
+public partial class MesonBuildParser 
 {
     private static string? GetMesonProjectContents(string mesonBuildFile) 
     {
@@ -86,7 +26,7 @@ public partial class MesonProjectFunctions
 
     public static MesonProjectBlock GetMesonProjectBlock(string mesonBuildFileContents) 
     {
-        var match = MesonRegex.GetProjectBlock.Match(mesonBuildFileContents);
+        var match = GetProjectBlock.Match(mesonBuildFileContents);
         
         if (!match.Success) {
             Console.WriteLine($"[WARNING]: Unable to parse the project object from the contents of the provided meson.build file");
@@ -96,7 +36,7 @@ public partial class MesonProjectFunctions
         
         string innerContent = match.Groups["content"].Value;
         
-        var positionalMatch = MesonRegex.GetProjectNameAndLanguage.Match(innerContent);
+        var positionalMatch = GetProjectNameAndLanguage.Match(innerContent);
 
         var block = new MesonProjectBlock() {
             ProjectName = positionalMatch.Groups["name"].Value,
@@ -135,7 +75,7 @@ public partial class MesonProjectFunctions
         string content = input.Trim().TrimStart('[').TrimEnd(']');
 
         // Seperates each argument found into a unique and sanitized element.
-        var matches = MesonRegex.GetArrayValueRegex.Matches(content);
+        var matches = GetArrayValueRegex.Matches(content);
 
         // Returns an array of flags (group=value)
         return [.. matches.Cast<Match>().Select(m => m.Groups["val"].Value)];
