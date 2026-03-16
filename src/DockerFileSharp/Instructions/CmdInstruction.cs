@@ -12,7 +12,7 @@ namespace DockerFileSharp.Instructions;
 ///     An array of individual command strings to be concatenated.
 /// </param>
 /// <param name="UseExecForm">
-///     Determines whether or not the Exec form. <br/>
+///     Determines whether or not to use the Exec form. <br/>
 ///     For more information see: https://docs.docker.com/reference/dockerfile/#exec-form
 /// </param>
 

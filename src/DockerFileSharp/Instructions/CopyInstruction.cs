@@ -10,7 +10,7 @@ namespace DockerFileSharp.Instructions;
 ///     The ADD and COPY instructions are functionally similar, but serve slightly different purposes. <br/>
 ///     For more information see: https://docs.docker.com/build/building/best-practices/#add-or-copy  <br/>
 /// 
-///     Note: This implementation doesnt include: <br/>
+///     Note: This implementation doesn't include: <br/>
 /// 
 ///     <br/>--link, --parents, --exclude
 ///     <br/>For more information see: https://docs.docker.com/reference/dockerfile/#copy
