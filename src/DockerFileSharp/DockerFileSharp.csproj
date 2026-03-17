@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
+    <OutputType>library</OutputType>
     <AssemblyName>dockerfilesharp</AssemblyName>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -9,7 +9,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <InvariantGlobalization>false</InvariantGlobalization>
     <UseNativeXmlSerialization>true</UseNativeXmlSerialization>
-    <PublishSingleFile>true</PublishSingleFile>		
+    <!-- <PublishSingleFile>true</PublishSingleFile>		 -->
 	  <SelfContained>true</SelfContained>
     <TrimMode>full</TrimMode>
     <StackTraceSupport>false</StackTraceSupport>

@@ -8,7 +8,6 @@
     <Nullable>enable</Nullable>
     <PublishSingleFile>true</PublishSingleFile>		
 		<SelfContained>true</SelfContained>
-
     <TrimMode>full</TrimMode>
     <StackTraceSupport>false</StackTraceSupport>
     <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
