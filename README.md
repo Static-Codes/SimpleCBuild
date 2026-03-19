@@ -2,7 +2,7 @@
 ## Cross platform one-click build utility for native c and C++. 
 
 ## How it will work:
-  - `scb --repo=<path/to/repo>` or `scb --private --repo=<path/to/repo> --token=<OAuthToken>`
+  - `SimpleCBuild --repo=<path/to/repo>` or `SimpleCBuild --private --repo=<path/to/repo> --token=<OAuthToken>`
   - Attempts to authenticate the session (if `--private` is passed)
   - Prompts the user to select a branch to build from.
   - Returns a list of ALL files in that specific branch
