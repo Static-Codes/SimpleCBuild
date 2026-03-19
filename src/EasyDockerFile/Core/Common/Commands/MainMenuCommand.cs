@@ -1,7 +1,11 @@
+using DockerFileSharp.Common;
+using EasyDockerFile.Core.Extensions;
 using EasyDockerFile.Core.Types.Git;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.Diagnostics.CodeAnalysis;
+using static EasyDockerFile.Core.Helpers.InputHelper;
+using static EasyDockerFile.Core.Loaders.FamilyLoader;
 
 namespace EasyDockerFile.Core.Common.Commands;
 public class MainMenuCommand : AsyncCommand<MainMenuSettings>
@@ -63,6 +67,40 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
 
         
         Console.WriteLine(client);
+
+        var families = GetFamilies();
+
+
+        // Choosing image family
+        var familyNames = families.Select(fam => fam.Name);
+        var familyChoice = AskForInput(
+            message: "Please select your desired image family.", 
+            options: MakeInputMenu(familyNames)
+        );
+        UserExitStatusCheck(familyChoice);
+
+        var family = families.GetFamily(familyChoice);
+        CheckForNullInput(family);
+
+
+        // Choosing image version
+        var imageNames = family.Images.Select(a => a.FullName);
+        CheckForNullInput(imageNames);
+
+        var imageChoice = AskForInput(
+            message: "Please select your desired image version.", 
+            options: MakeInputMenu(imageNames!)
+        );
+        UserExitStatusCheck(imageChoice);
+
+        var selectedImage = family.Images.GetImage(imageChoice);
+        CheckForNullInput(selectedImage);
+
+        // Creating a DockerImage instance with the selected Image object
+        var selectedDockerImage = new DockerImage(selectedImage);
+
+        var buildInstructions = selectedDockerImage.GetInstructions(settings.RepoLink, repoInfoObj.RepoUrlObj.RepoName);
+        var fileContents = buildInstructions.Build();
         return 0;
             
     }
