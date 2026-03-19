@@ -24,6 +24,12 @@ public static class InputHelper
 
     public static string AskForInput(string message, IEnumerable<string> options)
     {
+        if (!options.Any()) {
+            AnsiConsole.Write($"[yellow]{WarningTag}[/] Unable to create selection menu");
+            AnsiConsole.Write($"[red]{ErrorTag}[/] Parameter 'options' is empty in InputHelper.AskForInput()");
+            Environment.Exit(1);
+        }
+        
         var style = new Style(decoration: Decoration.Bold);
         var prompt = new SelectionPrompt<string>() { SearchEnabled = true }
         .HighlightStyle(style)
