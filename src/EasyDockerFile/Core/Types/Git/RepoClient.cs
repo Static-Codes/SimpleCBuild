@@ -7,7 +7,6 @@ using Spectre.Console;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using static Global.Constants;
 using static Global.Logging;
 
 public class RepoClient
@@ -235,7 +234,8 @@ public class RepoClient
 
         var branchNameChoice = InputHelper.AskForInput(
             message: "Please select a branch to use from the list below.", 
-            options: branches.Select(branch => branch.Name)
+            options: branches.Select(branch => branch.Name),
+            pageSize: branches.Count < 10 ? branches.Count : 10 // Max out at 10 items per page.
         );
 
         _repoInfo.SelectedBranch = 
@@ -244,71 +244,9 @@ public class RepoClient
             .FirstOrDefault();
     }
 
-    public async Task UpdateFilesAsync() 
-    {
-        if (_repoInfo?.RepoUrlObj?.Username == null) {
-            WriteWarningMessage("Unable to retrieve the contents of the repository at the provided uri.");
-            WriteErrorMessage("'_repoInfo.RepoUrlObj.Username' is null in UpdateFileNamesAsync()", exit: true);
-        }
-
-        if (_repoInfo?.RepoUrlObj?.RepoName == null) {
-            WriteWarningMessage("Unable to the contents of the repository at the provided uri.");
-            WriteErrorMessage("Variable '_repoInfo.RepoUrlObj.RepoName' is null in UpdateFileNamesAsync()", exit: true);
-        }
-
-        if (_repoInfo?.SelectedBranch == null) {
-            WriteWarningMessage("Unable to the contents of the repository at the provided uri.");
-            WriteErrorMessage("Variable '_repoInfo.SelectedBranch' is null in UpdateFileNamesAsync()", exit: true);
-        }
-
+    public async Task UpdateBranchFileCount() {
         _repoInfo.SelectedBranchFileCount = await GetFileCountOfBranch();
-
-        
-        if (_repoInfo.SelectedBranchFileCount > 100) 
-        {
-            WriteWarningMessage($"This repository contains {_repoInfo.SelectedBranchFileCount} files.");
-            
-            if (!AnsiConsole.Confirm("Are you sure you want to continue?")) {
-                Environment.Exit(0);
-            }
-        }
-
-
-        string branchToUse = _repoInfo.SelectedBranch.Name;
-
-        Console.WriteLine($"[INFO]: Retrieving {_repoInfo.SelectedBranchFileCount} files, please wait, this may take some time.");
-
-        try 
-        {
-            var repo = await _client.Repository.Get(
-                _repoInfo.RepoUrlObj.Username, 
-                _repoInfo.RepoUrlObj.RepoName
-            );
-            
-            // If the user hasn't specified a branch, a fallback to the DefaultBranch is the solution.
-            if (string.IsNullOrEmpty(branchToUse)) {
-                branchToUse = repo.DefaultBranch;
-            }
-        }
-
-        catch (NotFoundException) 
-        {
-            WriteErrorMessage("Branch not found.", exit: true);
-        }
-
-        var filePaths = await GetFlattenedFileList(
-            _repoInfo.RepoUrlObj.Username, 
-            _repoInfo.RepoUrlObj.RepoName, 
-            $"refs/heads/{_repoInfo.SelectedBranch.Name}");
-
-        if (!filePaths.Any()) {
-            WriteWarningMessage("Unable to the contents of the repository at the provided uri.");
-            WriteErrorMessage("Variable 'filePaths' is empty in UpdateFileNamesAsync()", exit: true);
-        }
-
-        _repoInfo.FilePaths = filePaths;
     }
-
     public async Task UpdateProjectLanguagesAsync() 
     {
         var parsedLangs = new List<RepoLanguage>();
@@ -381,9 +319,6 @@ public class RepoClient
         -----------------------------------
         - Languages in Branch:
             {_repoInfo.ProjectLanguages.AsPrettyPrintedLanguageList()}
-        -----------------------------------
-        - Files in Branch:
-            {_repoInfo.FilePaths.AsPrettyPrintedPathList()}
         """;
     }
 }

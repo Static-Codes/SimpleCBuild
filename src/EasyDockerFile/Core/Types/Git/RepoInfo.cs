@@ -1,8 +1,7 @@
 using EasyDockerFile.Core.Common.Commands;
 using EasyDockerFile.Core.Extensions;
 using Octokit;
-using Spectre.Console;
-using static Global.Constants;
+using static Global.Logging;
 
 namespace EasyDockerFile.Core.Types.Git;
 
@@ -17,7 +16,6 @@ public class RepoInfo(MainMenuSettings settings)
     public Branch? SelectedBranch { get; set; } = null;
     public int? SelectedBranchFileCount { get; set; } = null;
     public IEnumerable<RepoLanguage> ProjectLanguages { get; set; } = [];
-    public IEnumerable<string> FilePaths { get; set; } = [];
     public bool IsPrivate => Status == RepoStatus.Private;
     public bool IsValid => Status != RepoStatus.NotFound && Status != RepoStatus.NotSet;
     public bool RequiresAuth => Authentication != null && this.GetOAuthToken() != null;
@@ -27,8 +25,8 @@ public class RepoInfo(MainMenuSettings settings)
     public void UpdateBranches(IReadOnlyList<Branch>? branch)
     {
         if (branch == null) {
-            AnsiConsole.Write($"[yellow]{WarningTag}[/] Unable to update RepoInfo.BranchObj");
-            AnsiConsole.Write($"[red]{ErrorTag}[/] branch is null in RepoInfo.UpdateBranch()");
+            WriteWarningMessage("Unable to update RepoInfo.BranchObj");
+            WriteErrorMessage("branch is null in RepoInfo.UpdateBranch()");
             return;
         }
         BranchesObj = branch; 

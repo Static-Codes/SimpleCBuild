@@ -7,7 +7,7 @@ namespace EasyDockerFile.Core.Helpers;
 public static class InputHelper 
 {
     public const string ExitChoice = "Exit";
-    public static string AskForInput(string message, string[] options)
+    public static string AskForInput(string message, string[] options, int? pageSize = null)
     {
         var style = new Style(decoration: Decoration.Bold);
         var prompt = new SelectionPrompt<string>() { SearchEnabled = true }
@@ -18,11 +18,13 @@ public static class InputHelper
                 opt => opt.EscapeMarkup()
             )
         )
-        .PageSize(Math.Max(options.Length, 3));
+        .PageSize(
+            pageSize ?? Math.Max(options.Length, 3)
+        );
         return AnsiConsole.Prompt(prompt);
     }
 
-    public static string AskForInput(string message, IEnumerable<string> options)
+    public static string AskForInput(string message, IEnumerable<string> options, int? pageSize = null)
     {
         if (!options.Any()) {
             AnsiConsole.Write($"[yellow]{WarningTag}[/] Unable to create selection menu");
@@ -39,7 +41,9 @@ public static class InputHelper
                 opt => opt.EscapeMarkup()
             )
         )
-        .PageSize(Math.Max(options.Count(), 3));
+        .PageSize(
+            pageSize ?? Math.Max(options.Count(), 3)
+        );
         return AnsiConsole.Prompt(prompt);
     }
 

@@ -12,6 +12,10 @@ public static class StringExtension
             return $"- Unable to resolve, please check your OAuth Token above.";
         }
 
+        if (branchNames.Count > 15) {
+            return $"- This repository has {branchNames.Count} branches, thats too many to print!";
+        }
+
         return $"- {string.Join($"{NLC}    - ", branchNames.Select(branch => branch.Name))}";
     }
 
