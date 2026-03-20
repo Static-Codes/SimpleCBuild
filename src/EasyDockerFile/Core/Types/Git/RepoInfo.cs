@@ -2,7 +2,7 @@ using EasyDockerFile.Core.Common.Commands;
 using EasyDockerFile.Core.Extensions;
 using Octokit;
 using Spectre.Console;
-using static EasyDockerFile.Core.Common.Constants;
+using static Global.Constants;
 
 namespace EasyDockerFile.Core.Types.Git;
 

@@ -1,5 +1,7 @@
 namespace EasyDockerFile.Core.Types.Git;
 
+using static Global.Logging;
+
 public class RepoUrl 
 {
     public string? Protocol;
@@ -28,9 +30,8 @@ public class RepoUrl
     public static RepoUrl Build(string? repoURL) 
     {
         if (repoURL == null) {
-            Console.WriteLine("[WARNING]: Unable to build System.Uri object");
-            Console.WriteLine($"[ERROR]: repoURL is null in RepoUrl.Build(...)");
-            Environment.Exit(1);
+            WriteWarningMessage("Unable to build System.Uri object");
+            WriteErrorMessage("repoURL is null in RepoUrl.Build(...)", exit: true);
         }
 
         Uri? uri = null;
@@ -38,10 +39,9 @@ public class RepoUrl
             uri = new Uri(repoURL);
         }
         catch (Exception ex) {
-            Console.WriteLine("[WARNING]: Unable to build System.Uri object");
-            Console.WriteLine($"[ERROR TYPE]: {ex.GetType()}");
-            Console.WriteLine($"[ERROR]: {ex.Message}");
-            Environment.Exit(1);
+            WriteWarningMessage("Unable to build System.Uri object");
+            WriteErrorMessage($"Error type: {ex.GetType()}");
+            WriteErrorMessage(ex.Message, exit: true);
         }
 
         var isGithubUri = uri.Host.ToLower().Equals("github.com") || uri.Host.ToLower().Equals("www.github.com");
@@ -58,15 +58,13 @@ public class RepoUrl
         var isValidDomain = uri.Host.ToLower().Equals("github.com") || uri.Host.ToLower().Equals("www.github.com");
 
         if (!isValidDomain) {
-            Console.WriteLine("[WARNING]: Invalid 'url' param passed to RepoUrl.Build(url, GitProvider.Github)");
-            Console.WriteLine($"[ERROR]: Parameter `url` must start point to github.com/user/repo or www.github.com/user/repo");
-            Environment.Exit(1);
+            WriteWarningMessage("Invalid 'url' param passed to RepoUrl.Build(url, GitProvider.Github)");
+            WriteErrorMessage("Parameter `url` must start point to github.com/user/repo or www.github.com/user/repo", exit: true);
         }
 
         if (uri.Segments.Length != 3) {
-            Console.WriteLine("[WARNING]: Invalid 'url' param passed to RepoUrl.Build(url, GitProvider.Github)");
-            Console.WriteLine($"[ERROR]: uri.Segments.Length was not equal to 3.");
-            Environment.Exit(1);
+            WriteWarningMessage("Invalid 'url' param passed to RepoUrl.Build(url, GitProvider.Github)");
+            WriteErrorMessage("uri.Segments.Length was not equal to 3.", exit: true);
         }
 
         return new RepoUrl(){

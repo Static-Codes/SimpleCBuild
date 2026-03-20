@@ -7,7 +7,8 @@ using Spectre.Console;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using static EasyDockerFile.Core.Common.Constants;
+using static Global.Constants;
+using static Global.Logging;
 
 public class RepoClient
 {
@@ -40,8 +41,7 @@ public class RepoClient
 
         else {
             client = null;
-            var eMessage = $"{ErrorTag} The specified repository requires an OAuth Token to access.";
-            AnsiConsole.MarkupLine($"[red]{eMessage}[/]");
+            WriteErrorMessage("The specified repository requires an OAuth Token to access.");
             Console.WriteLine("[INFO]: Please include an OAuth Token in your command.");
             Console.WriteLine("[INFO]: Use the --help flag for more information.");
             Environment.Exit(1);
@@ -73,9 +73,7 @@ public class RepoClient
 
     public async Task<int> GetFileCountOfBranch() {
         if (_repoInfo.SelectedBranch == null) {
-            AnsiConsole.MarkupLine($"[yellow]{WarningTag} _client._repoInfo.SelectedBranch is not set.[/]");
-            AnsiConsole.MarkupLine($"[red]{ErrorTag} _client._repoInfo.SelectedBranch is not set.[/]");
-            Environment.Exit(1);
+            WriteErrorMessage("_client._repoInfo.SelectedBranch is not set.", exit: true);
         }
 
         var treeResponse = await _client.Git.Tree.GetRecursive(
@@ -107,13 +105,11 @@ public class RepoClient
 
         catch (NotFoundException ex) 
         {
-            Console.WriteLine($"[ERROR]: Branch not found: {ex.Message}");
-            Environment.Exit(1);
+            WriteErrorMessage($"Branch not found: {ex.Message}", exit: true);
         }
         
         catch (Exception ex) {
-            var eMessage = Markup.Escape($"[ERROR]: {ex.Message}.");
-            AnsiConsole.MarkupLine($"[red]{eMessage}[/]");
+            WriteErrorMessage(ex.Message);
             
             if (ex.Message.StartsWith("API rate limit exceeded")) {
                 Console.WriteLine("[INFO]: https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api");
@@ -176,8 +172,8 @@ public class RepoClient
     public async Task UpdateBranchesAsync()
     {
         if (_client.Repository == null) {
-            Console.WriteLine("[WARNING]: Unable to locate a repository at the provided uri.");
-            Console.WriteLine("[ERROR]: _client.Repository is null in UpdateBranchesAsync()");
+            WriteWarningMessage("Unable to locate a repository at the provided uri.");
+            WriteErrorMessage("_client.Repository is null in UpdateBranchesAsync()");
             Console.WriteLine("[INFO]: If you are positive the uri you provided is correct, please run:");
             Console.WriteLine("[COMMAND]: easy-dockerfile --private url/to/repo");
             Environment.Exit(1);
@@ -185,9 +181,8 @@ public class RepoClient
         IReadOnlyList<Branch> branchesObj = [];
 
         if (_repoInfo == null) {
-            Console.WriteLine("[WARNING]: Unable to locate a repository at the provided uri.");
-            Console.WriteLine("[ERROR]: _repoInfo is null in UpdateBranchesAsync()");
-            Environment.Exit(1);
+            WriteWarningMessage("Unable to locate a repository at the provided uri.");
+            WriteErrorMessage("_repoInfo is null in UpdateBranchesAsync()", exit: true);
         }
 
         try {
@@ -200,9 +195,9 @@ public class RepoClient
         }
 
         catch (NotFoundException) {
-            Console.WriteLine("[WARNING]: Unable to locate branches at the provided repository uri.");
-            Console.WriteLine($"[ERROR TYPE]: NotFoundException");
-            Console.WriteLine($"[ERROR]: Repository uri `{_repoInfo.RepoUrlObj.GetAbsoluteUrl()}` was not resolved.");
+            WriteWarningMessage("Unable to locate branches at the provided repository uri.");
+            WriteErrorMessage("Error type: NotFoundException");
+            WriteErrorMessage($"Repository uri `{_repoInfo.RepoUrlObj.GetAbsoluteUrl()}` was not resolved.");
             Console.WriteLine("[INFO]: If you are positive the uri you provided is correct, please run:");
             Console.WriteLine("[COMMAND]: easy-dockerfile --private url/to/repo");
             Environment.Exit(1);
@@ -225,21 +220,18 @@ public class RepoClient
     public async Task UpdateFilesAsync() {
 
         if (_repoInfo?.RepoUrlObj?.Username == null) {
-            Console.WriteLine("[WARNING]: Unable to retrieve the contents of the repository at the provided uri.");
-            Console.WriteLine("[ERROR]: '_repoInfo.RepoUrlObj.Username' is null in UpdateFileNamesAsync()");
-            Environment.Exit(1);
+            WriteWarningMessage("Unable to retrieve the contents of the repository at the provided uri.");
+            WriteErrorMessage("'_repoInfo.RepoUrlObj.Username' is null in UpdateFileNamesAsync()", exit: true);
         }
 
         if (_repoInfo?.RepoUrlObj?.RepoName == null) {
-            Console.WriteLine("[WARNING]: Unable to the contents of the repository at the provided uri.");
-            Console.WriteLine("[ERROR]: Variable '_repoInfo.RepoUrlObj.RepoName' is null in UpdateFileNamesAsync()");
-            Environment.Exit(1);
+            WriteWarningMessage("Unable to the contents of the repository at the provided uri.");
+            WriteErrorMessage("Variable '_repoInfo.RepoUrlObj.RepoName' is null in UpdateFileNamesAsync()", exit: true);
         }
 
         if (_repoInfo?.SelectedBranch == null) {
-            Console.WriteLine("[WARNING]: Unable to the contents of the repository at the provided uri.");
-            Console.WriteLine("[ERROR]: Variable '_repoInfo.SelectedBranch' is null in UpdateFileNamesAsync()");
-            Environment.Exit(1);
+            WriteWarningMessage("Unable to the contents of the repository at the provided uri.");
+            WriteErrorMessage("Variable '_repoInfo.SelectedBranch' is null in UpdateFileNamesAsync()", exit: true);
         }
 
         _repoInfo.SelectedBranchFileCount = await GetFileCountOfBranch();
@@ -247,7 +239,7 @@ public class RepoClient
         
         if (_repoInfo.SelectedBranchFileCount > 100) 
         {
-            Console.WriteLine($"[WARNING]: This repository contains {_repoInfo.SelectedBranchFileCount} files.");
+            WriteWarningMessage($"This repository contains {_repoInfo.SelectedBranchFileCount} files.");
             
             if (!AnsiConsole.Confirm("Are you sure you want to continue?")) {
                 Environment.Exit(0);
@@ -273,8 +265,7 @@ public class RepoClient
         }
         catch (NotFoundException) 
         {
-            Console.WriteLine("[ERROR]: Branch not found.");
-            Environment.Exit(1);
+            WriteErrorMessage("Branch not found.", exit: true);
         }
 
         var filePaths = await GetFlattenedFileList(
@@ -283,9 +274,8 @@ public class RepoClient
             $"refs/heads/{_repoInfo.SelectedBranch.Name}");
 
         if (!filePaths.Any()) {
-            Console.WriteLine("[WARNING]: Unable to the contents of the repository at the provided uri.");
-            Console.WriteLine("[ERROR]: Variable 'filePaths' is empty in UpdateFileNamesAsync()");
-            Environment.Exit(1);
+            WriteWarningMessage("Unable to the contents of the repository at the provided uri.");
+            WriteErrorMessage("Variable 'filePaths' is empty in UpdateFileNamesAsync()", exit: true);
         }
 
         _repoInfo.FilePaths = filePaths;
@@ -296,15 +286,13 @@ public class RepoClient
         var parsedLangs = new List<RepoLanguage>();
 
         if (_repoInfo?.RepoUrlObj?.Username == null) {
-            Console.WriteLine("[WARNING]: Unable to retrieve the contents of the repository at the provided uri.");
-            Console.WriteLine("[ERROR]: '_repoInfo.RepoUrlObj.Username' is null in UpdateFileNamesAsync()");
-            Environment.Exit(1);
+            WriteWarningMessage("Unable to retrieve the contents of the repository at the provided uri.");
+            WriteErrorMessage("'_repoInfo.RepoUrlObj.Username' is null in UpdateFileNamesAsync()", exit: true);
         }
 
         if (_repoInfo?.RepoUrlObj?.RepoName == null) {
-            Console.WriteLine("[WARNING]: Unable to the contents of the repository at the provided uri.");
-            Console.WriteLine("[ERROR]: Variable '_repoInfo.RepoUrlObj.RepoName' is null in UpdateFileNamesAsync()");
-            Environment.Exit(1);
+            WriteWarningMessage("Unable to the contents of the repository at the provided uri.");
+            WriteErrorMessage("Variable '_repoInfo.RepoUrlObj.RepoName' is null in UpdateFileNamesAsync()", exit: true);
         }
 
         var projectLangs = await _client.Repository.GetAllLanguages(_repoInfo.RepoUrlObj.Username, _repoInfo.RepoUrlObj.RepoName);

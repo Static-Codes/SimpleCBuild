@@ -1,5 +1,5 @@
 using System.Text;
-using static EasyDockerFile.Core.Common.Constants;
+using static Global.Constants;
 
 namespace EasyDockerFile.Core.Types.Build.Meson;
 public class MesonProjectBlock

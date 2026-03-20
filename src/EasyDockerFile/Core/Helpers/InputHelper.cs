@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Spectre.Console;
-using static EasyDockerFile.Core.Common.Constants;
+using static Global.Constants;
 
 namespace EasyDockerFile.Core.Helpers;
 

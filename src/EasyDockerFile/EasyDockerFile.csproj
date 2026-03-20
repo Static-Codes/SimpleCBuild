@@ -34,9 +34,14 @@
 		<PackageTags>console;utility;windows;linux;osx</PackageTags>
   </PropertyGroup>
 
-
   <ItemGroup>
     <ProjectReference Include="../DockerFileSharp/DockerFileSharp.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" Version="0.54.0" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.53.1" />
+    <PackageReference Include="Octokit" Version="14.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,11 +50,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Spectre.Console" Version="0.54.0" />
-    <PackageReference Include="Spectre.Console.Cli" Version="0.53.1" />
-    <PackageReference Include="Octokit" Version="14.0.0" />
-    </ItemGroup>
-
+    <Compile Include="../Global/Constants.cs" />
+    <Compile Include="../Global/Logging.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <TrimmerRootDescriptor Include="Resources/Trimmer/Roots.xml" />

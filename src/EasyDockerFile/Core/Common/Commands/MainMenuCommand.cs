@@ -75,7 +75,7 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
         // Choosing image family
         var familyNames = families.Select(fam => fam.Name);
         var familyChoice = AskForInput(
-            message: "Please select your desired image family.", 
+            message: "Please select your desired image family for the Docker container", 
             options: MakeInputMenu(familyNames)
         );
         UserExitStatusCheck(familyChoice);

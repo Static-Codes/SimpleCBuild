@@ -7,9 +7,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Linq;
-using static EasyDockerFile.Core.Common.Constants;
 using static EasyDockerFile.Core.Common.Platform;
 using static EasyDockerFile.Core.Common.RequestManager.NetworkClient;
+using static Global.Constants;
+using static Global.Logging;
 using static System.Runtime.InteropServices.Architecture;
 
 namespace EasyDockerFile.Core.API.PackageSearch;
@@ -138,14 +139,14 @@ public class FedoraPackageApi : IPackageSearchApi
 
 
             var finalPackageUri = new Uri(new Uri(baseUri), desiredBlock.Location.Href);
-            Console.WriteLine($"[SUCCESS]: Initialized _getUriTask with Uri: {finalPackageUri}");
+            WriteSuccessMessage($"Initialized _getUriTask with Uri: {finalPackageUri}");
             return finalPackageUri.ToString();
         }
 
         catch (Exception ex) {
-            Console.WriteLine("[WARNING]: Unable to initialize _getUriTask");
-            Console.WriteLine($"[ERROR TYPE]: {ex.GetType().Name}");
-            Console.WriteLine($"[ERROR]: {ex.Message}");
+            WriteWarningMessage("Unable to initialize _getUriTask");
+            WriteErrorMessage($"Error type: {ex.GetType().Name}");
+            WriteErrorMessage(ex.Message);
         }
 
         return null;
@@ -244,9 +245,9 @@ public class FedoraPackageApi : IPackageSearchApi
         }
 
         catch (Exception ex) {
-            Console.WriteLine("[WARNING]: Unable to decompress fedora manifest");
-            Console.WriteLine($"[ERROR TYPE]: {ex.GetType().Name}");
-            Console.WriteLine($"[ERROR]: {ex.Message}");
+            WriteWarningMessage("Unable to decompress fedora manifest");
+            WriteErrorMessage($"Error type: {ex.GetType().Name}");
+            WriteErrorMessage(ex.Message);
         }
 
         finally
@@ -312,13 +313,13 @@ public class FedoraPackageApi : IPackageSearchApi
                 File.Delete(tempXMLStream.Name); 
             }
 
-            Console.WriteLine("[SUCCESS]: Download successful");
+            WriteSuccessMessage("Download successful");
         }
 
         catch (Exception ex) {
-            Console.WriteLine("[WARNING]: Unable to process Fedora package manifest");
-            Console.WriteLine($"[ERROR TYPE]: {ex.GetType().Name}");
-            Console.WriteLine($"[ERROR]: {ex.Message}");
+            WriteWarningMessage("Unable to process Fedora package manifest");
+            WriteErrorMessage($"Error type: {ex.GetType().Name}");
+            WriteErrorMessage(ex.Message);
         }
 
         finally {

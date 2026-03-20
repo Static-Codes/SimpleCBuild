@@ -1,9 +1,8 @@
+namespace Global;
+
 using System.Reflection;
-using Spectre.Console;
 
-namespace EasyDockerFile.Core.Common;
-
-public class Constants 
+internal class Constants 
 {
     public static readonly Assembly _assembly = Assembly.GetExecutingAssembly();
     public const BindingFlags _privateFlag = BindingFlags.NonPublic;
@@ -15,6 +14,7 @@ public class Constants
     public const string BaseZChunkPattern = "EasyDockerFile.Resources.Utilities.unzck";
     public readonly static string[] MesonUnixSystemNames = ["darwin", "dragonfly", "freebsd", "linux", "netbsd", "openbsd"];
 
-    public readonly static string WarningTag = Markup.Escape("[WARNING]:");
-    public readonly static string ErrorTag = Markup.Escape("[WARNING]:");
+    public readonly static string ErrorTag = "[[ERROR]]:";
+    public readonly static string WarningTag = "[[WARNING]]:";
+    public readonly static string SuccessTag = "[[SUCCESS]]:";
 }

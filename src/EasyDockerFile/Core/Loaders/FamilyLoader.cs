@@ -2,7 +2,8 @@ using EasyDockerFile.Core.API.PackageSearch.Mappers;
 using DockerFileSharp.Common.Image;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
-using static EasyDockerFile.Core.Common.Constants;
+using static Global.Constants;
+using static Global.Logging;
 
 namespace EasyDockerFile.Core.Loaders;
 
@@ -20,10 +21,8 @@ public static class FamilyLoader
 
         using var stream = _assembly.GetManifestResourceStream(ImageXMLPattern);
 
-        if (stream == null)
-        {
-            Console.WriteLine($"[ERROR]: Resource {ImageXMLPattern} not found.");
-            Environment.Exit(1);
+        if (stream == null) {
+            WriteErrorMessage($"Resource {ImageXMLPattern} not found.", exit: true);
         }
 
         var doc = XDocument.Load(stream);
@@ -33,17 +32,17 @@ public static class FamilyLoader
 
         if (families == null || families.Length == 0)
         {
-            Console.WriteLine("[WARNING]: No families found in XML.");
+            WriteWarningMessage("No families found in XML.");
             return [];
         }
 
         foreach (var family in families)
         {
             family.Name = family.Name.Trim();
-            Console.WriteLine($"[INFO]: Loaded base family: {family.Name}");
+            WriteSuccessMessage($"Loaded base family: {family.Name}");
         }
 
-        Console.WriteLine("[SUCCESS]: Loaded Base Docker families.");
+        WriteSuccessMessage("Loaded DockerImage families.");
         return families;
     }
 }

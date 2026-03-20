@@ -1,7 +1,7 @@
 using System.Text;
 using EasyDockerFile.Core.Types.Git;
 using Octokit;
-using static EasyDockerFile.Core.Common.Constants;
+using static Global.Constants;
 
 namespace EasyDockerFile.Core.Extensions;
 

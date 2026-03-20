@@ -1,6 +1,6 @@
 using System.Text;
 using System.Xml.Linq;
-using static EasyDockerFile.Core.Common.Constants;
+using static Global.Constants;
 
 namespace EasyDockerFile.Core.API.PackageSearch.Manifests;
 

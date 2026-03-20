@@ -1,5 +1,6 @@
 using DockerFileSharp.Common.Image;
 using DockerFileSharp.Instructions;
+using static Global.Logging;
 
 namespace DockerFileSharp.Common;
 
@@ -21,14 +22,14 @@ public class DockerImage(IsoImage selectedImage)
     {
 
         if (repoName == null) {
-            Console.WriteLine("[WARNING]: Unable to return the dockerfile instructions that are required to continue.");
-            Console.WriteLine("[ERROR]: repoName is null in DockerImage.GetInstructions()");
+            WriteWarningMessage("Unable to return the dockerfile instructions that are required to continue.");
+            WriteErrorMessage("repoName is null in DockerImage.GetInstructions()");
             return [];
         }
 
         if (repoLink == null) {
-            Console.WriteLine("[WARNING]: Unable to return the dockerfile instructions that are required to continue.");
-            Console.WriteLine("[ERROR]: repoLink is null in DockerImage.GetInstructions()");
+            WriteWarningMessage("Unable to return the dockerfile instructions that are required to continue.");
+            WriteErrorMessage("repoLink is null in DockerImage.GetInstructions()");
             return [];
         }
 
@@ -69,8 +70,8 @@ public class DockerImage(IsoImage selectedImage)
         }
 
         else {
-            Console.WriteLine("[WARNING]: Unable to return the dockerfile instructions that are required to continue.");
-            Console.WriteLine("[ERROR]: ImageName returned an unexpected value in DockerImage.GetInstructions()");
+            WriteWarningMessage("Unable to return the dockerfile instructions that are required to continue.");
+            WriteErrorMessage("ImageName returned an unexpected value in DockerImage.GetInstructions()");
             Console.WriteLine($"[VALUE]: {ImageName}");
             return [];
         }

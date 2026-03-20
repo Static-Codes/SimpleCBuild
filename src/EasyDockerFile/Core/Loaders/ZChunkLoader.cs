@@ -1,5 +1,6 @@
 using static EasyDockerFile.Core.Common.Platform;
-using static EasyDockerFile.Core.Common.Constants;
+using static Global.Constants;
+using static Global.Logging;
 using static EasyDockerFile.Core.Common.SessionInfo;
 using static System.Runtime.InteropServices.Architecture;
 
@@ -40,9 +41,9 @@ public class ZChunkLoader()
         }
         catch (Exception ex) 
         {
-            Console.WriteLine("[WARNING]: Unable to load unzck binary");
-            Console.WriteLine($"[ERROR TYPE]: {ex.GetType().Name}");
-            Console.WriteLine($"[ERROR]: {ex.Message}");
+            WriteWarningMessage("Unable to load unzck binary");
+            WriteErrorMessage($"Error type: {ex.GetType().Name}");
+            WriteErrorMessage(ex.Message);
         }
         return null;
     }
