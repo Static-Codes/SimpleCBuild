@@ -15,6 +15,7 @@ public class RepoInfo(MainMenuSettings settings)
     public User? UserInfo = null;
     public Branch? SelectedBranch { get; set; } = null;
     public int? SelectedBranchFileCount { get; set; } = null;
+    public IEnumerable<string> TreeFiles { get; set; } = [];
     public IEnumerable<RepoLanguage> ProjectLanguages { get; set; } = [];
     public bool IsPrivate => Status == RepoStatus.Private;
     public bool IsValid => Status != RepoStatus.NotFound && Status != RepoStatus.NotSet;

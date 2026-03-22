@@ -37,6 +37,14 @@
     </system>
 
     <system>
+        <name>Meson</name>
+        <build_files>
+            <root_build_file>meson.build</root_build_file>
+            <global_build_file>meson_options.txt</global_build_file>
+        </build_files>
+    </system>
+
+    <system>
         <name>MSBuild</name>
         <build_files>
             <root_build_pattern>*.sln</root_build_pattern>

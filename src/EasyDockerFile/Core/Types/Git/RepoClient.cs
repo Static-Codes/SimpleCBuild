@@ -63,20 +63,13 @@ public class RepoClient
         return repoClient;
     }
 
-    public async Task<bool> RepoContainsFile(string fileName) 
+    public bool RepoContainsFile(string fileName) 
     {   
-        var fileExtension = Path.GetExtension(fileName);
-        var request = new SearchCodeRequest($"extension:{fileExtension}")
-        {
-            FileName = fileName,
-            Repos = { $"{_repoInfo.RepoUrlObj.GetRepoString()}" }
-        };
-
-        // Execute the search
-        var result = await _client.Search.SearchCode(request);
-
-        return result.TotalCount > 0;
-
+        // Iterates through each of the tree files in _repoInfo.TreeFiles
+        // Returns true if the filepath is exactly the fileName, or if it ends with /fileName.
+        return _repoInfo.TreeFiles.Any(f => 
+            f.Equals(fileName, StringComparison.OrdinalIgnoreCase) || 
+            f.EndsWith("/" + fileName, StringComparison.OrdinalIgnoreCase));
     }
 
     public async Task<int> GetFileCountOfBranch() {
@@ -90,7 +83,11 @@ public class RepoClient
             _repoInfo.SelectedBranch.Commit.Sha
         );
 
-        return treeResponse.Tree.Count(item => item.Type == TreeType.Blob);
+        _repoInfo.TreeFiles = [.. treeResponse.Tree
+            .Where(item => item.Type == TreeType.Blob)
+            .Select(item => item.Path)];
+
+        return _repoInfo.TreeFiles.Count();
     }
     
     public (bool IsRateLimited, Tuple<int, int, DateTimeOffset>? RateLimitInfo) GetRateLimitInfo()
@@ -181,7 +178,7 @@ public class RepoClient
         catch (NotFoundException) {
             WriteWarningMessage("Unable to locate branches at the provided repository uri.");
             WriteErrorMessage("Error type: NotFoundException");
-            WriteErrorMessage($"Repository uri `{_repoInfo.RepoUrlObj.GetAbsoluteUrl()}` was not resolved.");
+            WriteErrorMessage($"Repository uri `{_repoInfo.RepoUrlObj.GetAbsoluteUrlOfRepo()}` was not resolved.");
             Console.WriteLine("[INFO]: If you are positive the uri you provided is correct, please run:");
             Console.WriteLine("[COMMAND]: easy-dockerfile --private url/to/repo");
             Environment.Exit(1);
@@ -277,6 +274,9 @@ public class RepoClient
         -----------------------------------
         - Languages in Branch:
             {_repoInfo.ProjectLanguages.AsPrettyPrintedLanguageList()}
+        -----------------------------------
+        - Files in Branch:
+            {_repoInfo.TreeFiles.AsPrettyPrintedPathList()}
         """;
     }
 }

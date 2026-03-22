@@ -19,12 +19,18 @@ public class RepoUrl
         """;
     }
 
-    public string GetAbsoluteUrl() {
+
+    public string GetAbsoluteUrlOfRepo() {
         var fields = new string?[] {Protocol, Domain, Username, RepoName};
         if (fields.Any(field => field == null)) {
             throw new Exception("One of the members of the RepoUrl object is null.");
         }
         return $"{Protocol}://{Domain}/{Username}/{RepoName}";
+    }
+
+    public string GetAbsoluteUrlOfFileInRepo(string branch, string filePath) {
+        var absoluteRepoUrl = GetAbsoluteUrlOfRepo();
+        return $"{absoluteRepoUrl}/tree/{branch}/{filePath}";  
     }
 
     public string GetRepoString() {
