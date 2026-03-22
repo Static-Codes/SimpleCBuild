@@ -78,13 +78,6 @@ public class RepoClient
         return result.TotalCount > 0;
 
     }
-    
-    private async Task<IEnumerable<string>> GetFlattenedFileList(string owner, string repoName, string branchName)
-    {
-        var files = new List<string>();
-        await GetFilesRecursivelyAsync(owner, repoName, files, branchName);
-        return files;
-    }
 
     public async Task<int> GetFileCountOfBranch() {
         if (_repoInfo.SelectedBranch == null) {
@@ -99,42 +92,7 @@ public class RepoClient
 
         return treeResponse.Tree.Count(item => item.Type == TreeType.Blob);
     }
-
-    private async Task GetFilesRecursivelyAsync(string owner, string repoName, List<string> files, string branchName, string path = ".") 
-    {   
-        try 
-        {
-            var contents = await _client.Repository.Content.GetAllContentsByRef(owner, repoName, path, branchName);
-            
-            foreach (var content in contents)
-            {
-                if (content.Type == ContentType.File) {
-                    files.Add(content.Path);
-                }
-
-                else if (content.Type == ContentType.Dir) {
-                    await GetFilesRecursivelyAsync(owner, repoName, files, branchName, content.Path);
-                }
-            }
-        }
-
-        catch (NotFoundException ex) 
-        {
-            WriteErrorMessage($"Branch not found: {ex.Message}", exit: true);
-        }
-        
-        catch (Exception ex) {
-            WriteErrorMessage(ex.Message);
-            
-            if (ex.Message.StartsWith("API rate limit exceeded")) {
-                Console.WriteLine("[INFO]: https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api");
-            }
-            
-            Console.WriteLine("[INFO]: Use the --help flag for more information.");
-            Environment.Exit(1);
-        }
-    }
-
+    
     public (bool IsRateLimited, Tuple<int, int, DateTimeOffset>? RateLimitInfo) GetRateLimitInfo()
     {
         var rateLimit = _apiInfo?.RateLimit;
