@@ -53,32 +53,24 @@ public record CopyInstruction(string Source, string Destination, string? From = 
 : IDockerInstruction
 {   
     
-    private readonly string?[] CopyOptionValues = [From, Chmod, Chown];
     public string Build()
     {
-        var extraOptions = CopyOptionValues?.Where(option => option != null) ?? [];
-        
-        // Handles cases where no extra arguments are provided.
-        if (!extraOptions.Any()) {
+        if (From == null && Chmod == null && Chown == null) {
             return $"COPY {Source} {Destination}";
         }
 
         var builder = new StringBuilder();
         builder.Append("COPY ");
 
-        if (extraOptions.Contains(From)) {
+        if (From != null) {
             builder.Append($"--from={From} ");
         }
 
-        if (extraOptions.Contains(Chmod)) {
-            builder.Append($"--from={Chmod} ");
-        }
-
-        if (extraOptions.Contains(Chmod)) {
+        if (Chmod != null) {
             builder.Append($"--chmod={Chmod} ");
         }
 
-        if (extraOptions.Contains(Chown)) {
+        if (Chown != null) {
             builder.Append($"--chown={Chown} ");
         }
 
