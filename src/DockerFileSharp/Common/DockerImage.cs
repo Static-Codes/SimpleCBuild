@@ -52,7 +52,7 @@ public class DockerImage(IsoImage selectedImage)
                 new RunInstruction([
                     "apt-get update",
                     "apt-get install git curl -y",
-                    "mkdir -p ~/repos",
+                    "mkdir -p /root/repos",
                 ]),
             ]);
         }
@@ -64,7 +64,7 @@ public class DockerImage(IsoImage selectedImage)
                 new RunInstruction([
                     "dnf update",
                     "dnf install git curl -y",
-                    "mkdir -p ~/repos",
+                    "mkdir -p /root/repos",
                 ]),
             ]);
         }
@@ -78,11 +78,11 @@ public class DockerImage(IsoImage selectedImage)
 
         Instructions.AddRange(
         [
-            new WorkDirInstruction("~/repos"),
+            new WorkDirInstruction("/root/repos"),
 
             new RunInstruction([$"git clone {repoLink}"]),
 
-            new WorkDirInstruction($"~/repos/{repoName}")
+            new WorkDirInstruction($"/root/repos/{repoName}")
         ]);
 
         if (buildCommands != null && buildCommands.Count > 0)
