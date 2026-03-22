@@ -18,7 +18,7 @@ public class DockerImage(IsoImage selectedImage)
         return $"{baseName}:{version}";
     }
 
-    public List<IDockerInstruction> GetInstructions(string? repoLink, string? repoName) 
+    public List<IDockerInstruction> GetInstructions(string? repoLink, string? repoName, List<string>? buildCommands = null) 
     {
 
         if (repoName == null) {
@@ -80,10 +80,19 @@ public class DockerImage(IsoImage selectedImage)
         [
             new WorkDirInstruction("~/repos"),
 
-            new CmdInstruction(["bash", "-c", $"git clone {repoLink}"]),
+            new RunInstruction([$"git clone {repoLink}"]),
 
             new WorkDirInstruction($"~/repos/{repoName}")
         ]);
+
+        if (buildCommands != null && buildCommands.Count > 0)
+        {
+            Instructions.Add(
+                new RunInstruction(
+                    [..buildCommands]
+                )
+            );
+        }
 
         return Instructions;
     }
