@@ -18,7 +18,7 @@ public class DockerImage(IsoImage selectedImage)
         return $"{baseName}:{version}";
     }
 
-    public List<IDockerInstruction> GetInstructions(string? repoLink, string? repoName, List<string>? buildCommands = null) 
+    public List<IDockerInstruction> GetInstructions(string? repoLink, string? repoName, List<string>? buildCommands = null, string? exportPath = null) 
     {
 
         if (repoName == null) {
@@ -34,7 +34,7 @@ public class DockerImage(IsoImage selectedImage)
         }
 
         List<IDockerInstruction> Instructions = [
-            new FromInstruction(ImageName)
+            new FromInstruction(ImageName, Alias: "build")
         ];
 
         
@@ -92,6 +92,14 @@ public class DockerImage(IsoImage selectedImage)
                     [..buildCommands]
                 )
             );
+        }
+
+        if (!string.IsNullOrEmpty(exportPath))
+        {
+            Instructions.AddRange([
+                new FromInstruction("scratch"),
+                new CopyInstruction(Source: exportPath, Destination: "/", From: "build")
+            ]);
         }
 
         return Instructions;
