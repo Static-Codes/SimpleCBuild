@@ -42,38 +42,6 @@ public class BuildSystemInfo
     public bool IsPresent(IEnumerable<string> allFiles, IEnumerable<string>? rootFiles = null) => BuildFiles.IsMatch(allFiles, rootFiles);
 
     /// <summary>
-    ///     Performs a remote check using the provided RepoClient to see if any of the 
-    ///     explicitly named build files (root or global) exist in the repository.
-    /// </summary>
-    /// 
-    /// <param name="client">
-    ///     The RepoClient to be used in the remote detection.
-    /// </param>
-    public bool IsDetectedRemote(Git.RepoClient client)
-    {
-        // Checking for explicit global build files
-        foreach (var file in BuildFiles.GlobalBuildFiles)
-        {
-            if (client.RepoContainsFile(file)) {
-                return true;
-            }
-        }
-
-        // Checking for explicit root build files
-        // Currently: 
-        // RepoContainsFile uses GitHub search which is global in nature.
-        // This needs to be reworked in a later commit.
-        foreach (var file in BuildFiles.RootBuildFiles)
-        {
-            if (client.RepoContainsFile(file)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
     ///     Returns either the found BuildSystemName or a null value
     /// </summary>
     public BuildSystemName? GetBuildSystemName() => Enum.TryParse<BuildSystemName>(Name, true, out var result) ? result : null;
