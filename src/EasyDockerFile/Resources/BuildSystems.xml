@@ -1,0 +1,46 @@
+
+<systems>
+    <system>
+        <name>Autotools</name>
+        <build_files>
+            <global_build_file>configure.ac</global_build_file>
+            <global_build_file>Makefile.am</global_build_file>
+            <global_build_file>configure</global_build_file>
+        </build_files>
+    </system>
+
+    <system>
+        <name>Bazel</name>
+        <build_files>
+            <global_build_file>WORKSPACE</global_build_file>
+            <global_build_file>BUILD</global_build_file>
+            <global_build_file>BUILD.bazel</global_build_file>
+        </build_files>
+    </system>
+
+    <system>
+        <name>CMake</name>
+        <build_files>
+            <root_build_file>CMakeList.txt</root_build_file>
+            <root_build_pattern>*.cmake</root_build_pattern>
+            <global_build_file>CMakePresets.json</global_build_file>
+        </build_files>
+    </system>
+
+    <system>
+        <name>Make</name>
+        <build_files>
+            <root_build_file>Makefile</root_build_file>
+            <root_build_file>makefile</root_build_file>
+            <global_build_file>GNUmakefile</global_build_file>
+        </build_files>
+    </system>
+
+    <system>
+        <name>MSBuild</name>
+        <build_files>
+            <root_build_pattern>*.sln</root_build_pattern>
+            <global_build_pattern>*.vcxproj</global_build_pattern>
+        </build_files>
+    </system>
+</systems>

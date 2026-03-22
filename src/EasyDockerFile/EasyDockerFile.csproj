@@ -46,6 +46,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources/Images.xml"/>
+    <EmbeddedResource Include="Resources/BuildSystems.xml"/>
     <EmbeddedResource Include="Resources/Utilities/**"/> 
   </ItemGroup>
 
