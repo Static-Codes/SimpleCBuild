@@ -41,8 +41,8 @@ public class RepoClient
         else {
             client = null;
             WriteErrorMessage("The specified repository requires an OAuth Token to access.");
-            Console.WriteLine("[INFO]: Please include an OAuth Token in your command.");
-            Console.WriteLine("[INFO]: Use the --help flag for more information.");
+            WriteInformation("Please include an OAuth Token in your command.");
+            WriteInformation("Use the --help flag for more information.");
             Environment.Exit(1);
         }
         return client!;
@@ -155,7 +155,7 @@ public class RepoClient
         if (_client.Repository == null) {
             WriteWarningMessage("Unable to locate a repository at the provided uri.");
             WriteErrorMessage("_client.Repository is null in UpdateBranchesAsync()");
-            Console.WriteLine("[INFO]: If you are positive the uri you provided is correct, please run:");
+            WriteInformation("If you are positive the uri you provided is correct, please run:");
             Console.WriteLine("[COMMAND]: easy-dockerfile --private url/to/repo");
             Environment.Exit(1);
         }
@@ -179,7 +179,7 @@ public class RepoClient
             WriteWarningMessage("Unable to locate branches at the provided repository uri.");
             WriteErrorMessage("Error type: NotFoundException");
             WriteErrorMessage($"Repository uri `{_repoInfo.RepoUrlObj.GetAbsoluteUrlOfRepo()}` was not resolved.");
-            Console.WriteLine("[INFO]: If you are positive the uri you provided is correct, please run:");
+            WriteInformation("If you are positive the uri you provided is correct, please run:");
             Console.WriteLine("[COMMAND]: easy-dockerfile --private url/to/repo");
             Environment.Exit(1);
         }
@@ -228,7 +228,7 @@ public class RepoClient
     public void UpdateStatus() {
 
         if (_repoInfo == null) {
-            Console.WriteLine("[INFO]: _repoInfo is null, skipping _client.UpdateStatus()");
+            WriteInformation("_repoInfo is null, skipping _client.UpdateStatus()");
             return;
         }
         bool branchesExist = _repoInfo.GetBranches() != null;

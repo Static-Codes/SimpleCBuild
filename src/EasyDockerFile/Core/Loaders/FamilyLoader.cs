@@ -17,7 +17,7 @@ public static class FamilyLoader
     // [UnconditionalSuppressMessage("AotAnalysis", "IL3050", Justification = "Due to the analysis above, currently, this method is AOT safe.")]
     public static ImageFamily[] GetFamilies()
     {
-        Console.WriteLine("[INFO]: Loading Base Docker images.");
+        WriteInformation("Loading Base Docker images.");
 
         using var stream = _assembly.GetManifestResourceStream(ImageXMLPattern);
 

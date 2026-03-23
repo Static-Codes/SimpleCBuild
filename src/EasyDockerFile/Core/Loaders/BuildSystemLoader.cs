@@ -13,7 +13,7 @@ public static class BuildSystemLoader
     /// </summary>
     public static BuildSystemInfo[] GetBuildSystems()
     {
-        Console.WriteLine("[INFO]: Loading Build Systems.");
+        WriteInformation("Loading Build Systems.");
 
         using var stream = _assembly.GetManifestResourceStream(BuildSystemXMLPattern);
 

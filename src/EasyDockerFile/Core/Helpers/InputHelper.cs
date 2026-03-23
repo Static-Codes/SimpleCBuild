@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Spectre.Console;
 using static Global.Constants;
+using static Global.Logging;
 
 namespace EasyDockerFile.Core.Helpers;
 
@@ -27,8 +28,8 @@ public static class InputHelper
     public static string AskForInput(string message, IEnumerable<string> options, int? pageSize = null)
     {
         if (!options.Any()) {
-            AnsiConsole.Write($"[yellow]{WarningTag}[/] Unable to create selection menu");
-            AnsiConsole.Write($"[red]{ErrorTag}[/] Parameter 'options' is empty in InputHelper.AskForInput()");
+            WriteWarningMessage("Unable to create selection menu");
+            WriteErrorMessage("Parameter 'options' is empty in InputHelper.AskForInput()");
             Environment.Exit(1);
         }
         
@@ -64,8 +65,8 @@ public static class InputHelper
     public static void UserExitStatusCheck(string inputString) 
     {
         if (inputString.IsExitOption()) {
-            Console.WriteLine("[INFO]: Operation cancelled by user.");
-            Console.WriteLine("[INFO]: Exiting.");
+            WriteInformation("Operation cancelled by user.");
+            WriteInformation("Exiting.");
             Environment.Exit(1);
         }
     }

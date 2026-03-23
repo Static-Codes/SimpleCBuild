@@ -1,6 +1,6 @@
 ﻿using EasyDockerFile.Core.Common.Commands;
-using Spectre.Console;
 using Spectre.Console.Cli;
+using static Global.Logging;
 
 var app = new CommandApp<MainMenuCommand>();
 
@@ -10,8 +10,7 @@ Console.CancelKeyPress += (_, e) =>
 {
     e.Cancel = true; // Preventing the process from terminating immediately
     cancellationTokenSource.Cancel();
-    AnsiConsole.WriteLine("[red]Cancellation requested...[/]");
-    Environment.Exit(1);
+    WriteErrorMessage("Cancellation requested...", exitCode: 1, exit: true);
 };
 
 app.Configure(config =>

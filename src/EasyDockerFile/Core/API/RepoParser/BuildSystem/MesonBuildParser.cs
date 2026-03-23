@@ -3,6 +3,7 @@ using EasyDockerFile.Core.Extensions;
 using EasyDockerFile.Core.Types.Build.Meson;
 using System.Text.RegularExpressions;
 using static EasyDockerFile.Core.Types.Build.Meson.MesonRegex;
+using static Global.Logging;
 
 namespace EasyDockerFile.Core.API.RepoParser.BuildSystem;
 
@@ -34,7 +35,7 @@ public partial class MesonBuildParser
         }
         
         catch (Exception ex) {
-            Console.WriteLine($"[WARNING]: Unable to parse the contents of '{mesonBuildFile}'");
+            WriteWarningMessage($"Unable to parse the contents of '{mesonBuildFile}'");
             Console.WriteLine($"[ERROR]: {ex.GetType()}");
             Console.WriteLine($"[ERROR]: {ex.Message}");
             Environment.Exit(1);
@@ -51,7 +52,7 @@ public partial class MesonBuildParser
         var match = MesonProjectObjectRegex.Match(mesonBuildFileContents);
         
         if (!match.Success) {
-            Console.WriteLine($"[WARNING]: Unable to parse the project object from the meson.build file");
+            WriteWarningMessage($"Unable to parse the project object from the meson.build file");
             Environment.Exit(1);
         }
 
@@ -78,8 +79,8 @@ public partial class MesonBuildParser
         var matches = MesonDependencyRegex.Matches(mesonFileContent);
         
         if (matches.Count == 0) {
-            Console.WriteLine($"[WARNING]: Unable to parse any project dependencies from the provided meson.build file");
-            Console.WriteLine($"[ERROR]: matches.Count is 0 in GetMesonProjectObject");
+            WriteWarningMessage($"Unable to parse any project dependencies from the provided meson.build file");
+            WriteErrorMessage("matches.Count is 0 in GetMesonProjectObject()");
             return [];
         }
 
@@ -129,7 +130,7 @@ public partial class MesonBuildParser
             return ExtractArgumentValues(array.Value);
         }
 
-        Console.WriteLine($"[WARNING]: Unable to locate {name} in meson.build");
+        WriteWarningMessage($"Unable to locate {name} in meson.build");
         return ["Not Found"];
     }
 
@@ -139,7 +140,7 @@ public partial class MesonBuildParser
         
         if (fileContents == null) 
         {
-            Console.WriteLine($"[WARNING]: Unable to parse the contents of '{mesonBuildFile}'");
+            WriteWarningMessage($"Unable to parse the contents of '{mesonBuildFile}'");
             Console.WriteLine($"[ERROR]: fileContent is null in ParseMesonBuildFile()");
             Environment.Exit(1);
         }

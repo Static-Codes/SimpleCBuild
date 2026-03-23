@@ -26,7 +26,7 @@ public class FedoraPackageApi : IPackageSearchApi
     
     public FedoraPackageApi(Architecture architecture, string fedoraVersion)
     {
-        Console.WriteLine("[INFO]: Initializing _getUriTask");
+        WriteInformation("Initializing _getUriTask");
         PlatformIdentifer = GetPlatformIdentifer(architecture);
         _getUriTask = InitializeGetUriTask(architecture, fedoraVersion);
     }
@@ -111,11 +111,6 @@ public class FedoraPackageApi : IPackageSearchApi
             var doc = XDocument.Load(memoryStream);
 
             var repoXMLObj = FedoraXmlMapper.MapRepoMD(doc);
-
-            // var repoXMLFileObj = serializer.Deserialize(memoryStream);
-            // ArgumentNullException.ThrowIfNull(repoXMLFileObj, nameof(repoXMLFileObj));
-
-            // var repoXMLObj = (RepoMD)repoXMLFileObj;
 
             var dataBlocks = repoXMLObj.Data;
             ArgumentNullException.ThrowIfNull(dataBlocks, nameof(dataBlocks));
