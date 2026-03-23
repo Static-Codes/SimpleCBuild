@@ -12,4 +12,9 @@
     <ProjectReference Include="../EasyDockerFile/EasyDockerFile.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="../Global/Constants.cs" />
+    <Compile Include="../Global/Logging.cs" />
+  </ItemGroup>
+
 </Project>
