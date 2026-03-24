@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
-namespace EasyDockerFile.Core.Types.Build.Base;
+namespace Global.Build;
 
 public class BuildFiles
 {

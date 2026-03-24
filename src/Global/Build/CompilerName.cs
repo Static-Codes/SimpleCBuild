@@ -1,4 +1,4 @@
-namespace EasyDockerFile.Core.Types.Build.Base;
+namespace Global.Build;
 
 
 public enum CompilerName 

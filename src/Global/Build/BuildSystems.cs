@@ -1,7 +1,7 @@
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
-namespace EasyDockerFile.Core.Types.Build.Base;
+namespace Global.Build;
 
 [XmlRoot("systems")]
 public class BuildSystems

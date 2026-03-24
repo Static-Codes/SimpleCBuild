@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
-namespace EasyDockerFile.Core.Types.Build.Base;
+namespace Global.Build;
 
 public class BuildSystemInfo
 {
@@ -11,6 +11,9 @@ public class BuildSystemInfo
 
     [XmlElement("build_files")]
     public required BuildFiles BuildFiles { get; set; }
+    
+    [XmlElement("installation")]
+    public required BuildSystemInstallation Installation { get; set; }
 
     /// <summary>
     ///     Helper method to create a BuildSystemInfo object from an XElement object.
@@ -25,6 +28,7 @@ public class BuildSystemInfo
         {
             Name = (string)xElement.Element("name")! ?? string.Empty,
             BuildFiles = BuildFiles.FromXElement(xElement.Element("build_files")!),
+            Installation = BuildSystemInstallation.FromXElement(xElement.Element("installation")!),
         };
     }
 
