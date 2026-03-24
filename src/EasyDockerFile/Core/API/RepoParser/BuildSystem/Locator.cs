@@ -1,4 +1,4 @@
-using EasyDockerFile.Core.Types.Build.Base;
+using Global.Build;
 
 namespace EasyDockerFile.Core.API.RepoParser.BuildSystem;
 

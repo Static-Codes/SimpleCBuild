@@ -1,4 +1,4 @@
-using EasyDockerFile.Core.Types.Build.Base;
+using Global.Build;
 using System.Xml.Linq;
 using static Global.Constants;
 using static Global.Logging;
