@@ -38,8 +38,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="../Global/Constants.cs" />
-    <Compile Include="../Global/Logging.cs" />
+    <Compile Include="../Global/Build/*.cs" />
+    <Compile Include="../Global/*.cs" />
   </ItemGroup>
 
 </Project>
