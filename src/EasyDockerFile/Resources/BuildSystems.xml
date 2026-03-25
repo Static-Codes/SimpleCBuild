@@ -16,15 +16,46 @@
             <global_build_file>BUILD</global_build_file>
             <global_build_file>BUILD.bazel</global_build_file>
         </build_files>
+        <installation>
+            <debian>
+                <installation_command>apt install apt-transport-https curl gnupg -y</installation_command>
+                <installation_command>curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg</installation_command>
+                <installation_command>mv bazel.gpg /etc/apt/trusted.gpg.d/</installation_command>
+                <installation_command>echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list</installation_command>
+                <installation_command>apt update -y</installation_command>
+                <installation_command>apt install bazel -y</installation_command>
+            </debian>
+            <fedora>
+                <installation_command>dnf install dnf-plugins-core -y</installation_command>
+                <installation_command>dnf copr enable vbatts/bazel</installation_command>
+                <installation_command>dnf install bazel4 -y</installation_command>
+            </fedora>
+        </installation>
+        <build_commands>
+            <debian>
+                <build_command>bazel build</build_command>
+            </debian>
+            <fedora>
+                <build_command>bazel build</build_command>
+            </fedora>
+        </build_commands>
     </system>
 
     <system>
         <name>CMake</name>
         <build_files>
             <root_build_file>CMakeList.txt</root_build_file>
-            <root_build_pattern>*.cmake</root_build_pattern>
+            <global_build_pattern>*.cmake</global_build_pattern>
             <global_build_file>CMakePresets.json</global_build_file>
         </build_files>
+        <installation>
+            <debian>
+                <installation_command>apt-get install -y build-essential cmake</installation_command>
+            </debian>
+            <fedora>
+                <installation_command>dnf install -y @development-tools cmake</installation_command>
+            </fedora>
+        </installation>
     </system>
 
     <system>
@@ -42,6 +73,24 @@
             <root_build_file>meson.build</root_build_file>
             <global_build_file>meson_options.txt</global_build_file>
         </build_files>
+        <installation>
+            <debian>
+                <installation_command>apt install meson ninja-build -y</installation_command>
+            </debian>
+            <fedora>
+                <installation_command>dnf install meson ninja-build -y</installation_command>
+            </fedora>
+        </installation>
+        <build_commands>
+            <debian>
+                <build_command>meson setup build</build_command>
+                <build_command>meson compile -C build</build_command>
+            </debian>
+            <fedora>
+                <build_command>meson setup build</build_command>
+                <build_command>meson compile -C build</build_command>
+            </fedora>
+        </build_commands>
     </system>
 
     <system>
