@@ -1,12 +1,15 @@
 using DockerFileSharp.Common;
 using EasyDockerFile.Core.Extensions;
 using EasyDockerFile.Core.Loaders;
-using Global.Build;
+using EasyDockerFile.Core.Types.Build.Base;
 using EasyDockerFile.Core.Types.Git;
+using Global.Build;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using System.Text.Json;
 using static EasyDockerFile.Core.Helpers.InputHelper;
 using static EasyDockerFile.Core.Loaders.FamilyLoader;
 using static Global.Constants;
@@ -16,6 +19,8 @@ namespace EasyDockerFile.Core.Common.Commands;
 
 public class MainMenuCommand : AsyncCommand<MainMenuSettings>
 {
+    private static readonly JsonSerializerOptions options = new(){ WriteIndented=true };
+    private static readonly string configPath = Path.Combine(Path.GetTempPath(), "simplecbuild-config.json");
     private static async Task<bool> BuildContainer(string dockerfilePath, string systemName, string tagName)
     {
         var processInfo = new ProcessStartInfo
@@ -52,19 +57,18 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
 
             WriteErrorMessage(error);
 
-
             return false;
         }
 
         return true;
     }
 
-    private static async Task<bool> CopyBuildArtifacts(string fullContainerPath, string hostOutputDirectory) 
+    private static async Task<bool> CopyBuildArtifacts(string containerName, string fullContainerPath, string hostOutputDirectory) 
     {
         var copyPSI = new ProcessStartInfo
         {
             FileName = "docker",
-            Arguments = $"cp simplecbuild-temp:{fullContainerPath} {hostOutputDirectory}",
+            Arguments = $"cp {containerName}:{fullContainerPath} {hostOutputDirectory}",
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
@@ -102,12 +106,12 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
 
         return (repoInfoObj, client);
     }
-    private static async Task DeleteContainer() 
+    private static async Task DeleteContainer(string containerName) 
     {
         var removePSI = new ProcessStartInfo
         {
             FileName = "docker",
-            Arguments = "rm simplecbuild-temp",
+            Arguments = $"rm -f {containerName}",
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
@@ -115,10 +119,8 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
         };
         using var removeProcess = Process.Start(removePSI);
 
-        await removeProcess!.WaitForExitAsync();
-
-        if (removeProcess == null) {
-            WriteWarningMessage("Unable to remove the temporary docker container.");
+        if (removeProcess != null) {
+            await removeProcess.WaitForExitAsync();
         }
     }    
     public override async Task<int> ExecuteAsync([NotNull] CommandContext context, [NotNull] MainMenuSettings settings, CancellationToken cancellationToken) 
@@ -142,6 +144,7 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
 
         var selectedDockerImage = GetSelectedDockerImage();
 
+
         var buildSystemInfo = GetBuildSystemInfo(repoInfoObj);
         
         if (!buildSystemInfo.Any()) {
@@ -150,13 +153,24 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
 
         WriteSuccessMessage($"Detected {buildSystemInfo.Count()} Build Systems.");
 
-        await HandleCompilationAsync(settings, repoInfoObj, buildSystemInfo, selectedDockerImage);
+        var config = new BuildConfig() {
+            Settings = settings,
+            RepoInfoObj = repoInfoObj,
+            BuildSystemInfo = buildSystemInfo,
+            SelectedDockerImage = selectedDockerImage
+        };
+        
+        await HandleCompilationAsync(config);
+        
+        if (AnsiConsole.Confirm($"[{OrangeHex}][[INPUT]]: Would you like to remove all remaining docker containers?[/]")) {
+            await RemoveAllContainers();
+        }
         
         return 0;
             
     }
     
-    private static async Task<bool> ExtractBuildFilesFromContainer(string containerTagName, string? repoName, string containerPath, string hostOutputDirectory)
+    private static async Task<bool> ExtractBuildFilesFromContainer(string containerTagName, string? repoName, string hostOutputDirectory)
     {
 
         if (repoName == null) {
@@ -168,11 +182,15 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
             Directory.CreateDirectory(hostOutputDirectory);
         }
 
+        string containerName = $"simplecbuild-temp-{Guid.NewGuid().ToString()[..8]}";
+
         // Creating a temp docker container.
+        // Scratch images require a shell command to function as expected.
+        // 'sh' is chosen as its more reliable than `bash`.
         var createPSI = new ProcessStartInfo
         {
             FileName = "docker",
-            Arguments = $"create --name simplecbuild-temp {containerTagName}",
+            Arguments = $"create --name {containerName} {containerTagName} sh",
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
@@ -187,22 +205,19 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
         }
         
         await createContainerProcess.WaitForExitAsync(); 
-        
 
-        // The active path within the container is based on the WorkDir Instruction.
-        // The container path is either "build" (if Meson is in use) or "." otherwise.
-        string fullContainerPath = $"/root/repos/{repoName}/{containerPath.TrimStart('/')}";
-        
-        // Sanitizing the container path to ensure consistency
-        if (!fullContainerPath.EndsWith("/.")) {
-            fullContainerPath += "/.";
+        if (createContainerProcess.ExitCode != 0) {
+            WriteWarningMessage("Unable to create a temporary container to extract build artifacts.");
+            WriteErrorMessage(await createContainerProcess.StandardError.ReadToEndAsync(), exitCode: 1, exit: true);
         }
+        
+        string fullContainerPath = "/.";
 
         // Copying the files out using the absolute path of the container
-        var copySuccess = await CopyBuildArtifacts(fullContainerPath, hostOutputDirectory);
+        var copySuccess = await CopyBuildArtifacts(containerName, fullContainerPath, hostOutputDirectory);
         
         // Deleting the temporary container now that execution has finished.
-        await DeleteContainer();
+        await DeleteContainer(containerName);
 
         return copySuccess;
     }
@@ -214,7 +229,7 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
         {
             "Autotools" => ["./configure", "make"],
             "Bazel" => ["bazel build"],
-            "CMake" => ["cmake .", "make"],
+            "CMake" => ["cmake ./", "make"],
             "Meson" => ["meson setup build", "meson compile -C build"],
             "Make" => ["make"],
             _ => []
@@ -241,8 +256,8 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
     {
         return system.Name switch
         {
-            "Meson" => "build",
-            _ => "." // Defaults to root if an unexpected system is provided.
+            "Meson" => "build/src",
+            _ => "/" // Defaults to root if an unexpected system is provided.
         };
     }
     private static DockerImage GetSelectedDockerImage() 
@@ -280,33 +295,43 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
         
         return selectedDockerImage;
     }
-    private static async Task HandleCompilationAsync(
-        [NotNull] MainMenuSettings settings, 
-        RepoInfo repoInfoObj, 
-        IEnumerable<BuildSystemInfo> buildSystemInfo, 
-        DockerImage selectedDockerImage
-    ) 
+    private static async Task HandleCompilationAsync(BuildConfig config) 
     {
-        foreach (var buildSystem in buildSystemInfo) 
+        // Validates members of the provided config.
+        if (!config.IsValid()) {
+            Environment.Exit(1);
+        }
+
+        if (SaveRuntimeConfig(config)) {
+            WriteInformation(whiteText: configPath, coloredText: "Config saved to:", textColor: "blue");
+        }
+
+        else if (!AnsiConsole.Confirm("Would you like to continue?")) {
+            WriteInformation("", "Exiting..", "orange");
+            Environment.Exit(1);
+        }
+
+        foreach (var buildSystem in config.BuildSystemInfo) 
         {
             WriteStateMessage($"Attempting to compile using {buildSystem.Name}...");
             
             var buildCommands = GetBuildCommands(buildSystem);
-            var buildInstructions = selectedDockerImage.GetInstructions(
-                settings.RepoLink, 
-                repoInfoObj.RepoUrlObj.RepoName,
-                buildSystem.Installation,
-                exportPath: $"/root/repos/{repoInfoObj.RepoUrlObj.RepoName}",
-                buildCommands
+            var buildInstructions = config!.SelectedDockerImage!.GetInstructions(
+                repoLink: config!.Settings!.RepoLink, 
+                repoName: config!.RepoInfoObj!.RepoUrlObj.RepoName,
+                installations: buildSystem.Installations,
+                sourceDir: $"/root/repos/{config.RepoInfoObj.RepoUrlObj.RepoName}/{GetSystemExportPath(buildSystem).TrimStart('/')}",
+                buildCommands: buildSystem.Commands
             );
 
             var dockerFileContent = buildInstructions.Build();
 
-            string tempDockerFilePath = Path.Combine(Path.GetTempPath(), $"Dockerfile.{buildSystem.Name}.{Guid.NewGuid()}");
-            
+            string? tempDockerFilePath = null;
 
             try 
             {
+
+                tempDockerFilePath = Path.Combine(Path.GetTempPath(), $"Dockerfile.{buildSystem.Name}.{Guid.NewGuid()}");
                 File.WriteAllText(tempDockerFilePath, dockerFileContent);
 
                 // The tag is needed here as the build artifacts will be moved when "FROM scratch ..." is called.
@@ -316,18 +341,27 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
                 
                 if (!success) {
                     WriteErrorMessage($"Failed to compile using {buildSystem.Name}, continuing.");
+                    File.Delete(tempDockerFilePath);
+                    continue;
                 }
 
-                WriteSuccessMessage($"Successfully compiled repo using {buildSystem.Name}!");
+                WriteSuccessMessage($"Compiled repo using {buildSystem.Name}!");
                     
                 // Attempting to extract build artifacts.
                 string exportSourcePath = GetSystemExportPath(buildSystem);
                 string hostOutputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "output", buildSystem.Name);
                     
-                WriteStateMessage($"Transferring compiled files from {exportSourcePath} to {hostOutputDirectory}...");
+                WriteInformation(whiteText: "", coloredText: "Transferring compiled files from:");
+                WriteStateMessage($"[[Source]]: {exportSourcePath}");
+                WriteStateMessage($"[[Destination]]: {hostOutputDirectory}");
                 
-                if (await ExtractBuildFilesFromContainer(tagName, repoInfoObj.RepoUrlObj.RepoName, exportSourcePath, hostOutputDirectory)) {
+                if (await ExtractBuildFilesFromContainer(tagName, config.RepoInfoObj.RepoUrlObj.RepoName, hostOutputDirectory)) {
                     WriteSuccessMessage($"Files transferred to {hostOutputDirectory}");
+
+                    if (File.Exists(tempDockerFilePath)) {
+                        File.Delete(tempDockerFilePath);
+                    }
+
                     break;
                 }
                 
@@ -348,7 +382,32 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
         }
 
     }
+    private static async Task RemoveAllContainers() {
+        var removePSI = new ProcessStartInfo() {
+            FileName = "docker",
+            Arguments = "container prune -f",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true,
+            UseShellExecute = false,
+        };
 
+        using var removeProcess = Process.Start(removePSI);
+        
+        if (removeProcess == null) {
+            WriteWarningMessage("Unable to remove the remaining docker containers.");
+            WriteErrorMessage("removeProcess is null in RemoveAllContainers()", exitCode: 1, exit: true);
+        }
+
+        await removeProcess.WaitForExitAsync();
+
+        if (removeProcess.ExitCode != 0) {
+            WriteWarningMessage("Unable to remove the remaining docker containers.");
+            WriteErrorMessage(await removeProcess.StandardError.ReadToEndAsync(), exitCode: 1, exit: true);
+        }
+
+        WriteSuccessMessage("Removed remaining docker containers.");
+    }
     private static bool RepoLinkIsMissing([NotNull] MainMenuSettings settings) 
     {
         if (settings.RepoLink == null) {
@@ -358,6 +417,20 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
         }
         return false;
         
+    }
+
+    private static bool SaveRuntimeConfig(BuildConfig config) 
+    {
+        var configJSON = JsonSerializer.Serialize(config, options);
+        try {
+            File.WriteAllText(configPath, configJSON, Encoding.UTF8);
+            return true;
+        }
+        catch (Exception ex) {
+            WriteWarningMessage("Unable to save the runtime config for the current session.");
+            WriteErrorMessage(ex.Message);
+            return false;
+        }
     }
 
     private static bool TokenOrPrivateFlagMissing([NotNull] MainMenuSettings settings) 
