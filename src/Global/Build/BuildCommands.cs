@@ -9,10 +9,7 @@ public class BuildSystemCommands
 { 
 
 	[XmlElement(ElementName="debian")] 
-	public DebianBuildSystemCommand? Debian { get; set; } = null; 
-
-	[XmlElement(ElementName="fedora")] 
-	public FedoraBuildSystemCommand? Fedora { get; set; } = null;
+	public DebianBuildSystemCommand? Debian { get; set; } = null;
 
 	/// <summary>
     ///     Helper method to create a BuildFiles object from an XElement object.
@@ -28,15 +25,11 @@ public class BuildSystemCommands
         }
 
 		var debianBlock = xElement.Elements("debian");
-		var fedoraBlock = xElement.Elements("fedora");
 		
         return new BuildSystemCommands
         {
 			Debian = new DebianBuildSystemCommand() {
 			    BuildCommands = [.. GetCommandsFromBlock(debianBlock)],
-			},
-            Fedora = new FedoraBuildSystemCommand() {
-				BuildCommands = [.. GetCommandsFromBlock(fedoraBlock)],
 			}
         };
     }
@@ -51,15 +44,10 @@ public class BuildSystemCommands
 	public override string ToString() 
 	{
 		var debianCommands = Debian?.BuildCommands ?? [];
-		var fedoraCommands = Fedora?.BuildCommands ?? [];
 		
 		var builder = new StringBuilder();
 		foreach (var command in debianCommands){
 			builder.AppendLine(command);	
-		}
-
-		foreach (var command in fedoraCommands) {
-			builder.AppendLine(command);
 		}
 
 		return builder.ToString();
@@ -73,12 +61,4 @@ public class DebianBuildSystemCommand {
 	[XmlElement(ElementName="build_command")] 
 	public List<string> BuildCommands { get; set; } = [];
 }
-
-[XmlRoot(ElementName="fedora")]
-public class FedoraBuildSystemCommand { 
-
-	[XmlElement(ElementName="build_command")] 
-	public List<string> BuildCommands { get; set; } = [];
-}
-
 

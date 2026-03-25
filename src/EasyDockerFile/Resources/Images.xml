@@ -21,22 +21,4 @@
       </supported_architectures>
     </image>
   </family>
-  <family>Fedora
-    <image>
-      <version>43.0</version>
-      <full_name>Fedora 43.0</full_name>
-      <supported_architectures>
-        <supported_architecture>arm64</supported_architecture>
-        <supported_architecture>x64</supported_architecture>
-      </supported_architectures>
-    </image>
-    <image>
-      <version>42.0</version>
-      <full_name>Fedora 42.0</full_name>
-      <supported_architectures>
-        <supported_architecture>arm64</supported_architecture>
-        <supported_architecture>x64</supported_architecture>
-      </supported_architectures>
-    </image>
-  </family>
 </families>

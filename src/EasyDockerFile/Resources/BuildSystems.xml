@@ -25,19 +25,11 @@
                 <installation_command>apt update -y</installation_command>
                 <installation_command>apt install bazel -y</installation_command>
             </debian>
-            <fedora>
-                <installation_command>dnf install dnf-plugins-core -y</installation_command>
-                <installation_command>dnf copr enable vbatts/bazel</installation_command>
-                <installation_command>dnf install bazel4 -y</installation_command>
-            </fedora>
         </installation>
         <build_commands>
             <debian>
                 <build_command>bazel build</build_command>
             </debian>
-            <fedora>
-                <build_command>bazel build</build_command>
-            </fedora>
         </build_commands>
     </system>
 
@@ -52,9 +44,6 @@
             <debian>
                 <installation_command>apt-get install -y build-essential cmake</installation_command>
             </debian>
-            <fedora>
-                <installation_command>dnf install -y @development-tools cmake</installation_command>
-            </fedora>
         </installation>
     </system>
 
@@ -77,19 +66,12 @@
             <debian>
                 <installation_command>apt install meson ninja-build -y</installation_command>
             </debian>
-            <fedora>
-                <installation_command>dnf install meson ninja-build -y</installation_command>
-            </fedora>
         </installation>
         <build_commands>
             <debian>
                 <build_command>meson setup build</build_command>
                 <build_command>meson compile -C build</build_command>
             </debian>
-            <fedora>
-                <build_command>meson setup build</build_command>
-                <build_command>meson compile -C build</build_command>
-            </fedora>
         </build_commands>
     </system>
 

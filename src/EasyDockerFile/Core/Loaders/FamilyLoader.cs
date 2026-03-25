@@ -26,7 +26,7 @@ public static class FamilyLoader
         }
 
         var doc = XDocument.Load(stream);
-        var familiesObj = FedoraXmlMapper.MapImageFamilies(doc);
+        var familiesObj = XmlMapper.MapImageFamilies(doc);
 
         var families = familiesObj.SupportedFamilies;
 

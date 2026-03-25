@@ -85,18 +85,6 @@ public class DockerImage(IsoImage selectedImage)
             ]);
         }
 
-        else if (ImageName.StartsWith("fedora:")) 
-        {
-            Instructions.AddRange(
-            [
-                new RunInstruction([
-                    "dnf update",
-                    "dnf install git curl -y",
-                    "mkdir -p /root/repos",
-                ]),
-            ]);
-        }
-
         else {
             WriteWarningMessage("Unable to return the dockerfile instructions that are required to continue.");
             WriteErrorMessage("ImageName returned an unexpected value in DockerImage.GetInstructions()");
@@ -122,7 +110,7 @@ public class DockerImage(IsoImage selectedImage)
         {
             Instructions.Add(
                 new RunInstruction(
-                    [..GetCommandsForBuildSystem(buildCommands)]
+                    [.. GetCommandsForBuildSystem(buildCommands)]
                 )
             );
         }
@@ -144,31 +132,16 @@ public class DockerImage(IsoImage selectedImage)
         return Instructions;
     }
 
-    private string[] GetCommandsForBuildSystem(BuildSystemCommands buildCommands) 
+    private static string[] GetCommandsForBuildSystem(BuildSystemCommands buildCommands) 
     {
         #if DEBUG
             Console.WriteLine(buildCommands);
         #endif
         
-        var distroName = ImageName.Split(':')[0].ToLower();
-        
-        switch (distroName) 
-		{
-			case "debian": 
-				if (buildCommands.Debian != null && buildCommands.Debian.BuildCommands.Count > 0) {
-					return [.. buildCommands.Debian.BuildCommands];
-				}
-				return [];
-
-			case "fedora": 
-				if (buildCommands.Fedora != null && buildCommands.Fedora.BuildCommands.Count > 0) {
-					return [.. buildCommands.Fedora.BuildCommands];
-				}
-				return [];
-
-			default: 
-				throw new InvalidOperationException("Invalid distroName passed to GetPackagesForBuildSystem()");
+        if (buildCommands.Debian != null && buildCommands.Debian.BuildCommands.Count > 0) {
+			return [.. buildCommands.Debian.BuildCommands];
 		}
+		return [];
     }
 
     private string[] GetPackagesForBuildSystem(BuildSystemInstallations installations) 
@@ -180,22 +153,10 @@ public class DockerImage(IsoImage selectedImage)
         #endif
 
         
-        switch (distroName) 
-		{
-			case "debian": 
-				if (installations.Debian != null && installations.Debian.InstallationCommands.Count > 0) {
-					return [.. installations.Debian.InstallationCommands];
-				}
-				return ["apt-get install -y build-essential cmake"];
-
-			case "fedora": 
-				if (installations.Fedora != null && installations.Fedora.InstallationCommands.Count > 0) {
-					return [.. installations.Fedora.InstallationCommands];
-				}
-				return ["dnf install -y @development-tools cmake"];
-
-			default: 
-				throw new InvalidOperationException("Invalid distroName passed to GetPackagesForBuildSystem()");
+        if (installations.Debian != null && installations.Debian.InstallationCommands.Count > 0) {
+			return [.. installations.Debian.InstallationCommands];
 		}
+		return ["apt-get install -y build-essential cmake"];
+		
     }
 }

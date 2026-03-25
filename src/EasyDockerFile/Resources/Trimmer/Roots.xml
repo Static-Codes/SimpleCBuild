@@ -1,6 +1,5 @@
 <linker>
     <assembly fullname="easy-dockerfile"> 
-        <type fullname="EasyDockerFile.Core.API.PackageSearch.Manifests.FedoraManifest" preserve="all"/>
         <type fullname="EasyDockerFile.Core.Common.Commands.MainMenuCommand" preserve="all" />
         <type fullname="EasyDockerFile.Core.Common.Commands.MainMenuSettings" preserve="all" />
         <type fullname="DockerFileSharp.Common.Image.ImageFamilies" preserve="all" />
