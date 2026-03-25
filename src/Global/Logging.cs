@@ -8,6 +8,9 @@ using static Global.Constants;
 
 internal static class Logging
 {
+    public static void WriteDebugMessage(string message) {
+        AnsiConsole.MarkupLine($"[{OrangeHex}]{DebugTag}[/] {message.EscapeMarkup()}");
+    }
     public static void WriteErrorMessage(string message, int? exitCode = null, [DoesNotReturnIf(true)] bool exit = false)
     {
         AnsiConsole.MarkupLine($"[red]{ErrorTag}[/] {message.EscapeMarkup()}");

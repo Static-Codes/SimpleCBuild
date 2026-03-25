@@ -14,6 +14,7 @@ internal class Constants
     public const string BaseZChunkPattern = "EasyDockerFile.Resources.Utilities.unzck";
     public const string BuildSystemXMLPattern = "EasyDockerFile.Resources.BuildSystems.xml";
     public readonly static string[] MesonUnixSystemNames = ["darwin", "dragonfly", "freebsd", "linux", "netbsd", "openbsd"];
+    public const string DebugTag = "[[DEBUG]]";
     public const string ErrorTag = "[[ERROR]]:";
     public const string InfoTag = "[[INFO]]:";
     public const string WarningTag = "[[WARNING]]:";
