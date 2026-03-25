@@ -37,11 +37,16 @@ public class DockerImage(IsoImage selectedImage)
     ///     The BuildSystemInstallation object containing the installation instructions for the build system.
     /// </param>
     /// 
-    /// <param name="exportPath">
+    /// <param name="sourceDir">
     ///     <br/> The path on the container to a directory that will be extracted after compilation finishes. 
     ///     <br/> Defaults to the root directory (will copy the entire container which will be 4.7GB, this is not recommended.)
     /// </param>
-    public List<IDockerInstruction> GetInstructions(string? repoLink, string? repoName, BuildSystemInstallation installation, string? exportPath = "/", List<string>? buildCommands = null) 
+    /// 
+    /// <param name="buildCommands">
+    ///     <br/> A list of build commands loaded from BuildSystems.xml
+    /// </param>
+    /// 
+    public List<IDockerInstruction> GetInstructions(string? repoLink, string? repoName, BuildSystemInstallations installations, string? sourceDir = "/", BuildSystemCommands? buildCommands = null) 
     {
         if (repoName == null) {
             WriteWarningMessage("Unable to return the dockerfile instructions that are required to continue.");
@@ -54,6 +59,8 @@ public class DockerImage(IsoImage selectedImage)
             WriteErrorMessage("repoLink is null in DockerImage.GetInstructions()");
             return [];
         }
+
+        var repoPath = $"/root/repos/{repoName}";
 
         List<IDockerInstruction> Instructions = [
             new FromInstruction(ImageName, Alias: "build")
@@ -98,7 +105,7 @@ public class DockerImage(IsoImage selectedImage)
         }
 
         // Adding required packages for the build system itself.
-        Instructions.Add(new RunInstruction(GetPackagesForBuildSystem(installation)));
+        Instructions.Add(new RunInstruction(GetPackagesForBuildSystem(installations)));
 
         // Cloning and working directory instructions
         Instructions.AddRange(
@@ -107,47 +114,83 @@ public class DockerImage(IsoImage selectedImage)
 
             new RunInstruction([$"git clone {repoLink}"]),
 
-            new WorkDirInstruction($"/root/repos/{repoName}")
+            new WorkDirInstruction(repoPath)
         ]);
 
         // Handling build commands.
-        if (buildCommands != null && buildCommands.Count > 0)
+        if (buildCommands != null)
         {
             Instructions.Add(
                 new RunInstruction(
-                    [..buildCommands]
+                    [..GetCommandsForBuildSystem(buildCommands)]
                 )
             );
         }
 
 
         // Copying the build artifacts from container to the host machine.
-        if (!string.IsNullOrEmpty(exportPath))
+        if (!string.IsNullOrEmpty(sourceDir))
         {
             Instructions.AddRange([
                 new FromInstruction("scratch"),
-                new CopyInstruction(Source: exportPath, Destination: "/", From: "build")
+                new CopyInstruction(
+                    Source: sourceDir, 
+                    Destination: "/", 
+                    From: "build"
+                )
             ]);
         }
 
         return Instructions;
     }
 
-    private string[] GetPackagesForBuildSystem(BuildSystemInstallation installation) 
+    private string[] GetCommandsForBuildSystem(BuildSystemCommands buildCommands) 
     {
+        #if DEBUG
+            Console.WriteLine(buildCommands);
+        #endif
+        
         var distroName = ImageName.Split(':')[0].ToLower();
         
         switch (distroName) 
 		{
 			case "debian": 
-				if (installation.Debian != null && installation.Debian.InstallationCommands.Count > 0) {
-					return [.. installation.Debian.InstallationCommands];
+				if (buildCommands.Debian != null && buildCommands.Debian.BuildCommands.Count > 0) {
+					return [.. buildCommands.Debian.BuildCommands];
+				}
+				return [];
+
+			case "fedora": 
+				if (buildCommands.Fedora != null && buildCommands.Fedora.BuildCommands.Count > 0) {
+					return [.. buildCommands.Fedora.BuildCommands];
+				}
+				return [];
+
+			default: 
+				throw new InvalidOperationException("Invalid distroName passed to GetPackagesForBuildSystem()");
+		}
+    }
+
+    private string[] GetPackagesForBuildSystem(BuildSystemInstallations installations) 
+    {
+        var distroName = ImageName.Split(':')[0].ToLower();
+
+        #if DEBUG
+            WriteDebugMessage(installations.ToString());
+        #endif
+
+        
+        switch (distroName) 
+		{
+			case "debian": 
+				if (installations.Debian != null && installations.Debian.InstallationCommands.Count > 0) {
+					return [.. installations.Debian.InstallationCommands];
 				}
 				return ["apt-get install -y build-essential cmake"];
 
 			case "fedora": 
-				if (installation.Fedora != null && installation.Fedora.InstallationCommands.Count > 0) {
-					return [.. installation.Fedora.InstallationCommands];
+				if (installations.Fedora != null && installations.Fedora.InstallationCommands.Count > 0) {
+					return [.. installations.Fedora.InstallationCommands];
 				}
 				return ["dnf install -y @development-tools cmake"];
 
