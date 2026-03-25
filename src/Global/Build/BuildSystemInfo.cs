@@ -13,7 +13,9 @@ public class BuildSystemInfo
     public required BuildFiles BuildFiles { get; set; }
     
     [XmlElement("installation")]
-    public required BuildSystemInstallation Installation { get; set; }
+    public required BuildSystemInstallations Installations { get; set; }
+
+    public required BuildSystemCommands Commands { get; set; }
 
     /// <summary>
     ///     Helper method to create a BuildSystemInfo object from an XElement object.
@@ -28,7 +30,8 @@ public class BuildSystemInfo
         {
             Name = (string)xElement.Element("name")! ?? string.Empty,
             BuildFiles = BuildFiles.FromXElement(xElement.Element("build_files")!),
-            Installation = BuildSystemInstallation.FromXElement(xElement.Element("installation")!),
+            Installations = BuildSystemInstallations.FromXElement(xElement.Element("installation")!),
+            Commands = BuildSystemCommands.FromXElement(xElement.Element("build_commands")!)
         };
     }
 
