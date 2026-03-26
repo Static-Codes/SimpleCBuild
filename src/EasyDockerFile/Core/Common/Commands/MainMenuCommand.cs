@@ -274,20 +274,22 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
         var families = GetFamilies();
 
 
+        // Uncomment this block if multiple image families are reintroduced.
         // Choosing image family
-        var familyNames = families.Select(fam => fam.Name);
-        var familyChoice = AskForInput(
-            message: "Please select your desired image family for the Docker container", 
-            options: MakeInputMenu(familyNames)
-        );
-        UserExitStatusCheck(familyChoice);
+        // var familyNames = families.Select(fam => fam.Name);
+        // var familyChoice = AskForInput(
+        //     message: "Please select your desired image family for the Docker container", 
+        //     options: MakeInputMenu(familyNames)
+        // );
+        // UserExitStatusCheck(familyChoice);
 
-        var family = families.GetFamily(familyChoice);
+        // var family = families.GetFamily(familyChoice);
+        var family = families.GetFamily("Debian");
         CheckForNullInput(family);
-
 
         // Choosing image version
         var imageNames = family.Images.Select(a => a.FullName);
+        
         CheckForNullInput(imageNames);
 
         var imageChoice = AskForInput(
