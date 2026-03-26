@@ -24,13 +24,13 @@ public class BuildSystemInfo
     /// <param name="xElement">
     ///     The XElement object to be used in the creation of the BuildSystemInfo object.
     /// </param>
-    public static BuildSystemInfo FromXElement(XElement xElement)
+    public static BuildSystemInfo FromXElement(XElement xElement, string architectureString)
     {
         return new BuildSystemInfo
         {
             Name = (string)xElement.Element("name")! ?? string.Empty,
             BuildFiles = BuildFiles.FromXElement(xElement.Element("build_files")!),
-            Installations = BuildSystemInstallations.FromXElement(xElement.Element("installation")!),
+            Installations = BuildSystemInstallations.FromXElement(xElement.Element("installation")!, architectureString),
             Commands = BuildSystemCommands.FromXElement(xElement.Element("build_commands")!)
         };
     }

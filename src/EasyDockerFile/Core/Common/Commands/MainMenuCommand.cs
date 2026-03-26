@@ -144,8 +144,13 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
 
         var selectedDockerImage = GetSelectedDockerImage();
 
+        settings.SetArchitectureString();
 
-        var buildSystemInfo = GetBuildSystemInfo(repoInfoObj);
+        Console.WriteLine("Attempting to build for: ");
+        WriteStateMessage($"{settings.ArchitectureString}");
+
+
+        var buildSystemInfo = GetBuildSystemInfo(repoInfoObj, settings.ArchitectureString);
         
         if (!buildSystemInfo.Any()) {
             WriteErrorMessage("Unable to detect any build systems in the specified repository, please try again.", exitCode: 1, exit: true);
@@ -236,9 +241,9 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
         };
     }
 
-    private static IEnumerable<BuildSystemInfo> GetBuildSystemInfo(RepoInfo repoInfo) 
+    private static IEnumerable<BuildSystemInfo> GetBuildSystemInfo(RepoInfo repoInfo, string architectureString) 
     {
-        var allSupportedSystems = BuildSystemLoader.GetBuildSystems();
+        var allSupportedSystems = BuildSystemLoader.GetBuildSystems(architectureString);
         IEnumerable<BuildSystemInfo> foundSystems = [];
 
         var allFiles = repoInfo.TreeFiles;
@@ -260,6 +265,10 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
             _ => "/" // Defaults to root if an unexpected system is provided.
         };
     }
+
+    /// <summary>
+    ///     Prompts the user to select the desired image they wish to use for docker.
+    /// </summary>
     private static DockerImage GetSelectedDockerImage() 
     {
         var families = GetFamilies();
@@ -295,6 +304,15 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
         
         return selectedDockerImage;
     }
+    
+    /// <summary>
+    ///     Handles compilation operations for the provided BuildConfig. <br/>
+    ///     Including: <br/>
+    ///     - Validating the config                <br/>
+    ///     - Saving the config                    <br/>
+    ///     - Building a dockerfile                <br/>
+    ///     - Compiling the binary specified.      <br/>
+    /// </summary>
     private static async Task HandleCompilationAsync(BuildConfig config) 
     {
         // Validates members of the provided config.

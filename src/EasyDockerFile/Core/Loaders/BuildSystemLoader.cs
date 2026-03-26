@@ -11,7 +11,7 @@ public static class BuildSystemLoader
     /// <summary>
     /// Loads BuildSystems.xml and returns an array of BuildSystemInfo.
     /// </summary>
-    public static BuildSystemInfo[] GetBuildSystems()
+    public static BuildSystemInfo[] GetBuildSystems(string architectureString)
     {
         WriteInformation("Loading Build Systems.");
 
@@ -31,7 +31,7 @@ public static class BuildSystemLoader
             return [];
         }
 
-        var buildSystemsObj = BuildSystems.FromXElement(doc.Root);
+        var buildSystemsObj = BuildSystems.FromXElement(doc.Root, architectureString);
         var buildSystems = buildSystemsObj.Systems;
 
         if (buildSystems == null || buildSystems.Length == 0)

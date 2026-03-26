@@ -1,5 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
+using EasyDockerFile.Core.Helpers;
 using Spectre.Console.Cli;
 
 namespace EasyDockerFile.Core.Common.Commands;
@@ -24,9 +26,30 @@ public class MainMenuSettings : CommandSettings
     // --repo=https://github.com/user/repo
     // --repository=https://github.com/user/repo
     [CommandOption("-r|--repo|--repository <VALUE>")]
-    [Description("Specifies the repository you are attempting to build from.")]
+    [Description("Specifies the repository you want to build from.")]
     [DefaultValue(null)]
     public required string? RepoLink { get; init; }
+
+    [CommandOption("-a|--arch|--architecture <VALUE>")]
+    [Description("Specifies the architecture you want to build for.")]
+    [DefaultValue(null)]
+    public string? ArchitectureString { get; set; }
+
+    
+    /// <summary>
+    ///      <br/> Due to the requirement for [DefaultValue(type)] to be a compile time constant:
+    ///      <br/> The following mutator method is required and will be invoked by the global `settings` variable in MainMenuCommand.
+    ///      <br/> ArchitectureString is guaranteed to be a non-null value after the execution of this function.
+    /// </summary>
+    [MemberNotNull(nameof(ArchitectureString))]
+    public void SetArchitectureString() 
+    {
+        ArchitectureString ??= InputHelper.AskForInput(
+            message:"Please select your desired architecture to build for.", 
+            options: ["x64", "arm64", "Exit"], 
+            pageSize: 3
+        );
+    }
 
     // -t=<TOKEN>
     // --token=<TOKEN>

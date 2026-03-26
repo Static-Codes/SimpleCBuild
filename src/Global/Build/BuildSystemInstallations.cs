@@ -1,6 +1,7 @@
 using System.Text;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using static Global.Logging;
 
 namespace Global.Build;
 
@@ -17,7 +18,7 @@ public class BuildSystemInstallations {
     /// <param name="xElement">
     ///     The XElement object to be used in the creation of the BuildFiles object.
     /// </param>
-    public static BuildSystemInstallations FromXElement(XElement xElement)
+    public static BuildSystemInstallations FromXElement(XElement xElement, string architectureString)
     {
         if (xElement == null) {
             return new BuildSystemInstallations();
@@ -28,14 +29,21 @@ public class BuildSystemInstallations {
         return new BuildSystemInstallations
         {
 			Debian = new DebianBuildSystemInstallation() {
-				InstallationCommands = [.. GetInstallationCommands(debianBlock)],
+				InstallationCommands = [.. GetInstallationCommands(debianBlock, architectureString)],
 			},
         };
     }
 	
-	private static IEnumerable<string> GetInstallationCommands(IEnumerable<XElement> block) 
+	private static IEnumerable<string> GetInstallationCommands(IEnumerable<XElement> block, string architectureString) 
 	{
-		return block
+		var architectureBlock = block.Elements(architectureString);
+
+		if (!architectureBlock.Any()) {
+			WriteWarningMessage("Invalid architecture provided to GetInstallationCommands()");
+			return [];
+		}
+
+		return architectureBlock
 			.Elements("installation_command")
 			.Select(cmd => cmd.Value);
 	}
