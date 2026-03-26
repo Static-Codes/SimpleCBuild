@@ -63,19 +63,6 @@
 // Console.WriteLine(location);
 #endregion
 
-#region Testing to ensure the Fedora package manifest functionality works as intended.
-// using EasyDockerFile.Core.API.PackageSearch;
-// using static System.Runtime.InteropServices.Architecture;
-
-// var fedoraPackageApi = new FedoraPackageApi(X64, "43");
-// await fedoraPackageApi.Load();
-// Console.WriteLine("[SUCCESS]: Loaded {0} packages", fedoraPackageApi.PackageManifests.Count);
-
-// foreach (var manifest in fedoraPackageApi.PackageManifests[..10]) {
-//     Console.WriteLine(manifest);
-// }
-#endregion
-
 #region Testing RepoInfo
 
 // using EasyDockerFile.Core.API.ToolchainSearch.Git;
