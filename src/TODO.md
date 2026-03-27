@@ -1,9 +1,32 @@
-## Add Dependency resolution logic using the parsed global manifests
+|  Icon  |   Key Name        |
+|  :---: |     :---:         |
+|   ❌   | Not Started       |
+|   ⚠️   | In-Progress       |
+|   👎   | Needs Improvement |
+|   ✅   | Fully Implemented |
 
-## Add architecture selection for compilation
+## **General Logic Additions**
 
-## Add `<architecture>` section to each `<installation>` block
+#### 1. Build system parsing logic
+| Name      | Completed? |
+| :---:     | :---:      |
+| Autotools | ❌         |
+| Bazel     | ❌         |
+| CMake     | ❌         |
+| Make      | ❌         |
+| Meson     | 👎         |
+| MSBuild   | ❌         |
+
+
+#### 2. Dependency resolution logic from build systems
+| Name      | Approach           | Completed? |
+| :---:     | :---:              | :---:      |
+| Autotools | Converted to CMake | ❌         |
+| Bazel     | Native             | ❌         |
+| CMake     | Native             | ❌         |
+| Make      | Native             | ❌         |
+| Meson     | Native             | 👎         |
+| MSBuild   | Native             | ❌         |
 
 ## Add a `<build_commands>` section to each `<system>` in `BuildSystems.xml`
 
-## Add `<build_args>` section to each `<system>` in `BuildSystems.xml`

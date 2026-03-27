@@ -57,12 +57,6 @@
 // }
 #endregion
 
-#region ZChunk binary loading test
-// using EasyDockerFile.Core.Loaders;
-// var location = ZChunkLoader.Load();
-// Console.WriteLine(location);
-#endregion
-
 #region Testing RepoInfo
 
 // using EasyDockerFile.Core.API.ToolchainSearch.Git;

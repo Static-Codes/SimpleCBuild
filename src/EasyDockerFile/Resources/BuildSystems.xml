@@ -1,12 +1,34 @@
 
 <systems>
     <system>
+    <!-- 
+    Due to the existing complexities of implementing a unified build utility projects using Autotools will be converted to CMake.
+    -->
         <name>Autotools</name>
         <build_files>
             <global_build_file>configure.ac</global_build_file>
             <global_build_file>Makefile.am</global_build_file>
             <global_build_file>configure</global_build_file>
         </build_files>
+
+        <installation>
+            <debian>
+                <x64>
+                    <installation_command>apt install build-essential autoconf automake libtool m4</installation_command>
+                </x64>
+                <arm64>
+                    <installation_command>apt install build-essential autoconf automake libtool m4</installation_command>
+                </arm64>
+            </debian>
+        </installation>
+
+        <build_commands>
+            <debian>
+                <x64>
+
+                </x64>
+            </debian>
+        <build_commands>
     </system>
 
     <system>
@@ -34,11 +56,13 @@
                 </arm64>
             </debian>
         </installation>
+        
         <build_commands>
             <debian>
                 <build_command>bazel build</build_command>
             </debian>
         </build_commands>
+
     </system>
 
     <system>
