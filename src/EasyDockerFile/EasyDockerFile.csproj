@@ -9,7 +9,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <InvariantGlobalization>false</InvariantGlobalization>
     <UseNativeXmlSerialization>true</UseNativeXmlSerialization>
-    <!-- <PublishSingleFile>true</PublishSingleFile>		 -->
 		<SelfContained>true</SelfContained>
     <IsPublishable>false</IsPublishable> 
 
@@ -27,7 +26,6 @@
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-    <!-- <PublishAOT>true</PublishAOT> -->
 
 		<Authors>Static-Codes</Authors>
 		<Copyright>Copyright © Static-Codes</Copyright>
