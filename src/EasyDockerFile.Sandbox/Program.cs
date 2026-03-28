@@ -89,7 +89,7 @@
 // var app = new CommandApp<MainMenuCommand>();
 
 // var cancellationTokenSource = new CancellationTokenSource();
-  
+
 // Console.CancelKeyPress += (_, e) =>
 // {
 //     e.Cancel = true; // Preventing the process from terminating immediately
@@ -113,4 +113,15 @@
 
 #endregion
 
-Console.WriteLine("");
+#region Autotools to CMake conversion testing.
+
+using EasyDockerFile.Core.Conversion;
+
+var autotoolsConverter = new AutotoolsConverter(projectDirectory: "/home/nerdy/repos/gnupg");
+
+(bool success, string CMakeListsFilePath) = autotoolsConverter.ConvertToMake();
+
+Console.WriteLine(success);
+Console.WriteLine(CMakeListsFilePath);
+
+#endregion
