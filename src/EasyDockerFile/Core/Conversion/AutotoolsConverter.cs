@@ -28,7 +28,7 @@ public class AutotoolsConverter(string projectDirectory)
     public string ProjectDirectory { get; init; } = projectDirectory;
     AutotoolsResources AutotoolsResources { get; init; } = LoadAutotoolsResources();
     
-    public (bool success, string CMakeListsFilePath) ConvertToMake() 
+    public AutotoolsConversionResponse ConvertToMake() 
     {
         Process? process = null;
 
@@ -68,12 +68,39 @@ public class AutotoolsConverter(string projectDirectory)
         finally 
         {
             process.DisposeSafely();
+
+            // Now that this resource has been used, it can be safely deleted.
+            if (File.Exists(AutotoolsResources.Auto2CMakePath)) {
+                File.Delete(AutotoolsResources.Auto2CMakePath);
+                AutotoolsResources.Auto2CMakePath = null;
+            }
         }
 
         var cmakeListFilePath = Path.Combine(ProjectDirectory, "CMakeLists.txt");
         var cmakeListFileExists = File.Exists(cmakeListFilePath);
 
-        return (cmakeListFileExists, cmakeListFileExists ? cmakeListFilePath : "Not Generated");
+        var inspectPathIsNull = AutotoolsResources.CMakeInspectPath == null;
+
+        // Handling a VERY unlikely edge case, better safe than sorry! :)
+        // If cmakeListFileExists is true than inspectPathIsNull should ALWAYS be false.
+        if (cmakeListFileExists && inspectPathIsNull) {
+            WriteSuccessMessage($"CMakeLists generated at: {cmakeListFilePath}");
+            WriteErrorMessage("Failed to load cmake_inspect.py", exitCode: 1, exit: true);
+        }
+
+        if (!cmakeListFileExists) {
+            WriteWarningMessage("Failed to convert Autotools project to CMake.");
+            WriteErrorMessage("cmakeListFileExists is false in AutotoolsConversionResponse.ConvertToMake().", exitCode: 1, exit: true);
+        }
+
+
+        return new() {
+            Completed = cmakeListFileExists,
+            CMakeListsFilePath =  cmakeListFileExists ? cmakeListFilePath : "Not Generated",
+            // No explicit null check is required.
+            CMakeInspectPath = AutotoolsResources.CMakeInspectPath!
+        };
     }    
+
 
 }
