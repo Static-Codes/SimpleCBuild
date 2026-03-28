@@ -1,7 +1,10 @@
 # Core Ideology
 
-1. There will never be 100% true test coverage; in the words of Vince Lombardi, “Gentlemen, we will chase perfection, and we will chase it relentlessly, knowing all the while we can never attain it. But along the way, we shall catch excellence.” 
+1. There will never be 100% true test coverage. In the words of Vince Lombardi, **“Gentlemen, we will chase perfection, and we will chase it relentlessly, knowing all the while we can never attain it. But along the way, we shall catch excellence.”**
 
+2. While this project is already an incredible undertaking, significant boundaries needed to be drawn. These boundaries primarily concerned the environment(s) the project's support would cover. The most feasible solution was to limit this support to Desktop/Server environments. Further specificity is required; these machines must be running a single x64 and ARM64 processor. While this was not much of a concern for ARM64, many dual-processor x64 configurations exist. As such, the project will support dual socket systems, however, these systems must be be in a single-populated socket configuration to avoid unexpected behavior (unless otherwise specified).
+
+3. All build systems will be parsed and handled natively, excluding autotools, which will be converted to CMake. This is done to improve the ease of maintainability for any potential future contributors.
 
 # General Nuisances
 
