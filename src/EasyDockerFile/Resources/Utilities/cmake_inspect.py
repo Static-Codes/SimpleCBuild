@@ -29,7 +29,7 @@ queryReplyDirectory = apiDirectory / "reply"
 
 
 try:
-    print(f"CMake API query using local file at: {queryRequestFilePath}")
+    print(f"Making a CMake API query using local file at: {queryRequestFilePath}")
 
 
     if queryReplyDirectory.exists():
