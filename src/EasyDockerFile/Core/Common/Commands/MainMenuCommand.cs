@@ -20,7 +20,7 @@ namespace EasyDockerFile.Core.Common.Commands;
 public class MainMenuCommand : AsyncCommand<MainMenuSettings>
 {
     private static readonly JsonSerializerOptions options = new(){ WriteIndented=true };
-    private static readonly string configPath = Path.Combine(Path.GetTempPath(), "simplecbuild-config.json");
+    private static readonly string configPath = Path.Combine(TEMP_DIR, "simplecbuild-config.json");
     private static async Task<bool> BuildContainer(string dockerfilePath, string systemName, string tagName)
     {
         var processInfo = new ProcessStartInfo
@@ -351,7 +351,7 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
             try 
             {
 
-                tempDockerFilePath = Path.Combine(Path.GetTempPath(), $"Dockerfile.{buildSystem.Name}.{Guid.NewGuid()}");
+                tempDockerFilePath = Path.Combine(TEMP_DIR, $"Dockerfile.{buildSystem.Name}.{Guid.NewGuid()}");
                 File.WriteAllText(tempDockerFilePath, dockerFileContent);
 
                 // The tag is needed here as the build artifacts will be moved when "FROM scratch ..." is called.

@@ -7,6 +7,7 @@ namespace EasyDockerFile.Core.Loaders;
 
 public static class BuildSystemLoader
 {
+    public const string BuildSystemXMLPattern = "EasyDockerFile.Resources.BuildSystems.xml";
 
     /// <summary>
     /// Loads BuildSystems.xml and returns an array of BuildSystemInfo.
