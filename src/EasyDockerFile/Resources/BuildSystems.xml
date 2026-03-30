@@ -25,10 +25,9 @@
         <build_commands>
             <debian>
                 <x64>
-
                 </x64>
             </debian>
-        <build_commands>
+        </build_commands>
     </system>
 
     <system>
