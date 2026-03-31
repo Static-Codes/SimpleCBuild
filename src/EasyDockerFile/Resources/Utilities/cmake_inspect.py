@@ -69,9 +69,11 @@ except Exception as e:
     sys.exit(4)
 
 if queryReplyDirectory.exists():
-    globPaths = queryReplyDirectory.glob("codemodel-v2-*.json")
-    print("Files generated:") 
-    for globPath in globPaths:
-        print(f"\t- {globPath.name}")
+    globPaths = queryReplyDirectory.glob("*.json")
+    print("| ".join(globPaths))
+    # for globPath in globPaths:
+    #     print(f"{globPath.name}")
+
+
 else:
     print("CMake execution completed, however, the API did not generate a reply.")

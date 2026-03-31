@@ -116,13 +116,22 @@
 #region Autotools to CMake conversion testing.
 
 using EasyDockerFile.Core.Conversion;
+using EasyDockerFile.Core.Inspection;
 
-var autotoolsConverter = new AutotoolsConverter(projectDirectory: "/home/nerdy/repos/gnupg");
+var projectDirectory = "/home/nerdy/repos/gnupg";
+var autotoolsConverter = new AutotoolsConverter(projectDirectory);
 
 var autotoolsConversionResponse = autotoolsConverter.ConvertToMake();
 
 Console.WriteLine(autotoolsConversionResponse.Completed);
 Console.WriteLine(autotoolsConversionResponse.CMakeListsFilePath);
 Console.WriteLine(autotoolsConversionResponse.CMakeInspectPath);
+
+// This returns a list of all 4 json files returned by cmake_inspect.py
+var inspectionPaths = CMakeInspection.Run(autotoolsConversionResponse.CMakeInspectPath, projectDirectory);
+
+foreach (var path in inspectionPaths) {
+    Console.WriteLine(path);
+}
 
 #endregion
