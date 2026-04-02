@@ -25,7 +25,7 @@ namespace DockerFileSharp.Instructions;
 ///     For more information execute: <br/>
 ///         docker buildx ls <br/>
 /// </param>
-// See Docs/Methodology.md for more information about implementating IDockerInstruction.
+// See docs/methodology.md for more information about implementating IDockerInstruction.
 public record FromInstruction(string ImageName, string? Alias = null, string? Platform = null) : IDockerInstruction
 {
     // Using an Image object to create a DockerImage object. 

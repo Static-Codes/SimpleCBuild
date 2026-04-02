@@ -17,7 +17,7 @@ namespace DockerFileSharp.Instructions;
 /// </param>
 
 
-// See Docs/Methodology.md for more information about implementating IDockerInstruction.
+// See docs/methodology.md for more information about implementating IDockerInstruction.
 public record CmdInstruction(string[] Commands, bool UseExecForm = true) : IDockerInstruction
 {
     public string Build()

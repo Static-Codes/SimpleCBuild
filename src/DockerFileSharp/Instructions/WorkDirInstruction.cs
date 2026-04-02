@@ -30,7 +30,7 @@ namespace DockerFileSharp.Instructions;
 ///     The relative or absolute path you wish to use as the current working directory for the following instructions.
 /// </param>
 
-// See Docs/Methodology.md for more information about implementating IDockerInstruction.
+// See docs/methodology.md for more information about implementating IDockerInstruction.
 public record WorkDirInstruction(string Path) : IDockerInstruction
 {
     public string Build() {

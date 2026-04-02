@@ -13,7 +13,7 @@ namespace DockerFileSharp.Instructions;
 /// <param name="Instruction">
 ///     The IDockerfileInstruction to be executed as a trigger action at build time.
 /// </param>
-// See Docs/Methodology.md for more information about implementating IDockerInstruction.
+// See docs/methodology.md for more information about implementating IDockerInstruction.
 public record OnBuildInstruction(IDockerInstruction Instruction) : IDockerInstruction
 {
     public string Build()

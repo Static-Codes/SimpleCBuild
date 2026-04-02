@@ -19,7 +19,7 @@ namespace DockerFileSharp.Instructions;
 ///     A Dictionary containing the key and value pairs to be used in the .Build() command.
 /// </param>
 
-// See Docs/Methodology.md for more information about implementating IDockerInstruction.
+// See docs/methodology.md for more information about implementating IDockerInstruction.
 public record EnvInstruction(Dictionary<string, string> KeyValuePairs) : IDockerInstruction
 {
     private string HandleReturnValues() 

@@ -18,7 +18,7 @@ namespace DockerFileSharp.Instructions;
 ///     A Dictionary containing the key and value pairs for an IsoImage object's metadata.
 /// </param>
 
-// See Docs/Methodology.md for more information about implementating IDockerInstruction.
+// See docs/methodology.md for more information about implementating IDockerInstruction.
 public record LabelInstruction(Dictionary<string, string> Labels) : IDockerInstruction
 {
     public string Build()

@@ -27,7 +27,7 @@ namespace DockerFileSharp.Instructions;
 ///     For more information see: https://docs.docker.com/reference/dockerfile/#exec-form
 /// </param>
 
-// See Docs/Methodology.md for more information about implementating IDockerInstruction.
+// See docs/methodology.md for more information about implementating IDockerInstruction.
 public record EntryPointInstruction(string[] Commands, bool UseExecForm = true) : IDockerInstruction
 {
     public string Build()

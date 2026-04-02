@@ -25,7 +25,7 @@ namespace DockerFileSharp.Instructions;
 ///     - "9"
 /// </param>
 
-// See Docs/Methodology.md for more information about implementating IDockerInstruction.
+// See docs/methodology.md for more information about implementating IDockerInstruction.
 public record StopSignalInstruction(string Signal) : IDockerInstruction
 {
     public string Build() {

@@ -25,7 +25,7 @@ namespace DockerFileSharp.Instructions;
 /// </param> 
 
 
-// See Docs/Methodology.md for more information about implementating IDockerInstruction.
+// See docs/methodology.md for more information about implementating IDockerInstruction.
 public record UserInstruction(string User, string? Group = null) : IDockerInstruction
 {
     public string Build()

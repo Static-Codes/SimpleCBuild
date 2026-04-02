@@ -19,7 +19,7 @@ namespace DockerFileSharp.Instructions;
 ///     Windows Example: ["powershell", "-Command"]
 ///     Unix Example: ["/bin/bash", "-c Command"]
 /// </param>
-// See Docs/Methodology.md for more information about implementating IDockerInstruction.
+// See docs/methodology.md for more information about implementating IDockerInstruction.
 public record ShellInstruction(params string[] Shell) : IDockerInstruction
 {
     public string Build() 

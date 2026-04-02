@@ -16,7 +16,7 @@ namespace DockerFileSharp.Instructions;
 ///     - Example: ["80", "80/tcp", "443/udp"]
 /// </param>
 
-// See Docs/Methodology.md for more information about implementating IDockerInstruction.
+// See docs/methodology.md for more information about implementating IDockerInstruction.
 public record ExposeInstruction(params string[] Ports) : IDockerInstruction
 {
     public string Build()

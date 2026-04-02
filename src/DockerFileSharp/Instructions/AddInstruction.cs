@@ -27,7 +27,7 @@ namespace DockerFileSharp.Instructions;
 /// <param name="Checksum">
 ///     [Optional]: The checksum of the remote URL, if provided.
 /// </param>
-// See Docs/Methodology.md for more information about implementating IDockerInstruction.
+// See docs/methodology.md for more information about implementating IDockerInstruction.
 public record AddInstruction(string Source, string Destination, string? Chown = null, string? Chmod = null, string? Checksum = null) : IDockerInstruction
 {
     public string Build()
