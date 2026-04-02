@@ -70,7 +70,8 @@ except Exception as e:
 
 if queryReplyDirectory.exists():
     globPaths = queryReplyDirectory.glob("*.json")
-    print("| ".join(globPaths))
+    path_names = [globPath.name for globPath in globPaths]
+    print("| ".join(path_names))
     # for globPath in globPaths:
     #     print(f"{globPath.name}")
 
