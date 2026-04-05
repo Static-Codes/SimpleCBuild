@@ -4,7 +4,7 @@
 
 2. While this project is already an incredible undertaking, significant boundaries needed to be drawn. These boundaries primarily concerned the environment(s) the project's support would cover. The most feasible solution was to limit this support to Desktop/Server environments. Further specificity is required; these machines must be running a single x64 and ARM64 processor. While this was not much of a concern for ARM64, many dual-processor x64 configurations exist. As such, the project will support dual socket systems, however, these systems must be be in a single-populated socket configuration to avoid unexpected behavior (unless otherwise specified).
 
-3. All build systems will be parsed and handled natively, excluding autotools, which will be converted to CMake. This is done to improve the ease of maintainability for any potential future contributors.
+3. All build systems will be parsed and converted to CMake. This is done to ensure uniformity for any potential future contributors. While this has it's own shortcomings (namely the introduction of microservices), translation currently provides the best medium between user-accessibility and developer maintainability.
 
 # General Nuisances
 
