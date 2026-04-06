@@ -121,7 +121,7 @@ using EasyDockerFile.Core.Inspection;
 var projectDirectory = "/home/nerdy/repos/gnupg";
 var autotoolsConverter = new AutotoolsConverter(projectDirectory);
 
-var autotoolsConversionResponse = autotoolsConverter.ConvertToMake();
+var autotoolsConversionResponse = autotoolsConverter.TranslateToCMake();
 
 Console.WriteLine(autotoolsConversionResponse.Completed);
 Console.WriteLine(autotoolsConversionResponse.CMakeListsFilePath);

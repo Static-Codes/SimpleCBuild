@@ -28,7 +28,7 @@ public class AutotoolsConverter(string projectDirectory)
     public string ProjectDirectory { get; init; } = projectDirectory;
     AutotoolsResources AutotoolsResources { get; init; } = LoadAutotoolsResources();
     
-    public AutotoolsConversionResponse ConvertToMake() 
+    public AutotoolsConversionResponse TranslateToCMake() 
     {
         Process? process = null;
 
