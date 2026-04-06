@@ -1,6 +1,6 @@
 using static EasyDockerFile.Core.Common.Platform;
 
-namespace EasyDockerFile.Core.Types.Generic;
+namespace EasyDockerFile.Core.Helpers;
 
 public static class ExecutableHelper
 {
