@@ -1,8 +1,9 @@
 using EasyDockerFile.Core.Extensions;
 using EasyDockerFile.Core.Types.Conversion;
 using System.Diagnostics;
-using static EasyDockerFile.Core.Loaders.ConversionLoader;
+using static EasyDockerFile.Core.Helpers.ExecutableHelper;
 using static EasyDockerFile.Core.Helpers.ProcessHelper;
+using static EasyDockerFile.Core.Loaders.ConversionLoader;
 using static Global.Logging;
 
 
@@ -28,13 +29,64 @@ public class AutotoolsConverter(string projectDirectory)
     public string ProjectDirectory { get; init; } = projectDirectory;
     AutotoolsResources AutotoolsResources { get; init; } = LoadAutotoolsResources();
     
+    private string[] FindOldBuildArtifacts() 
+    {
+        List<string> oldBuildArtifacts = [];
+
+        var rootCMakeFile = Path.Combine(ProjectDirectory, "CMakeLists.txt");
+        
+        if (File.Exists(rootCMakeFile)) {
+            oldBuildArtifacts.Add(rootCMakeFile);
+        }
+        
+        var subDirectories = Directory.GetDirectories(ProjectDirectory);
+
+        foreach (var subDirectory in subDirectories) 
+        {
+
+            var subDirectoryCMakeFile = Path.Combine(subDirectory, "CMakeLists.txt");
+
+            if (File.Exists(subDirectoryCMakeFile)) {
+                oldBuildArtifacts.Add(subDirectoryCMakeFile);
+            }
+        }
+
+        return [.. oldBuildArtifacts];
+    }
+
+    public void DeleteOldBuildArtifacts() 
+    {
+        var oldBuildArtifacts = FindOldBuildArtifacts();
+
+        if (oldBuildArtifacts.Length == 0) {
+            WriteWarningMessage("No old build artifacts were located, continuing.");
+            return;
+        }
+
+        WriteInformation("Deleting old build artifacts.");
+        Thread.Sleep(300);
+
+        for (int i = 0; i < oldBuildArtifacts.Length; i++) 
+        {
+            Thread.Sleep(350);
+
+            File.Delete(oldBuildArtifacts[i]);
+            WriteInformation($"Deleted old build artifact at: {oldBuildArtifacts[i]} ({i}/{oldBuildArtifacts.Length})");
+            Thread.Sleep(350);
+        }
+
+        WriteSuccessMessage($"Deleted all build artifacts from: {ProjectDirectory}");
+    }
+
     public AutotoolsConversionResponse TranslateToCMake() 
     {
+        DeleteOldBuildArtifacts();
+
         Process? process = null;
 
         var auto2CMakePSI = new ProcessStartInfo() 
         {
-            FileName = "python3",
+            FileName = $"{GetPythonExecutable()}",
             Arguments = $"{AutotoolsResources.Auto2CMakePath} -d {ProjectDirectory}",
             RedirectStandardError = true,
             RedirectStandardOutput = true,
@@ -90,7 +142,7 @@ public class AutotoolsConverter(string projectDirectory)
 
         if (!cmakeListFileExists) {
             WriteWarningMessage("Failed to convert Autotools project to CMake.");
-            WriteErrorMessage("cmakeListFileExists is false in AutotoolsConversionResponse.ConvertToMake().", exitCode: 1, exit: true);
+            WriteErrorMessage("cmakeListFileExists is false in AutotoolsConversionResponse.TranslateToCMake().", exitCode: 1, exit: true);
         }
 
 
