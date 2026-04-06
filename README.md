@@ -1,5 +1,5 @@
 # 🚧 Under Construction 🚧
-# User-friendly Cross-platform build utility for native c and C++. 
+### User-friendly Cross-platform build utility for native c and C++. 
 
 ## Usage:
   ### For public repos
