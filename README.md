@@ -43,6 +43,7 @@
 
          ##### Meson
          - Handled natively through parsing due to the lack of resources surrounding translation from Meson to CMake. There is functionality in Meson to convert a pre-existing CMake project to Meson, but not vice versa.
-
-  4. Creates a container using docker to prevent a dependency hell.
-  5. Performs a set of build operations within the container, and produces a binary of the selected output type.
+  
+  ### Compilation Operations
+  1. Creates a container using docker to prevent a dependency hell.
+  2. Performs a set of build operations within the container, and produces a binary of the selected output type.
