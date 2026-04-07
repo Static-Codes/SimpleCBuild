@@ -1,6 +1,4 @@
 using EasyDockerFile.Core.API.PackageSearch;
-using EasyDockerFile.Core.Common;
-using System.Runtime.Versioning;
 using static Global.Constants;
 using static Global.Logging;
 
@@ -51,16 +49,13 @@ public class ResourceHelper
             
             bool execPermSet = false;
 
-            if (Platform.IsWindows) {
+            if (OperatingSystem.IsWindows()) {
                 return Path.Combine(TEMP_DIR, fileName);
             }
 
-            // Rosyln sees the [UnsupportedOSPlatform("windows")] attribute from this function but not the logic surrounding it's call.
-            // As such, the code below suppressed the CA1416 warning.
-            
-            #pragma warning disable 
-            execPermSet = UnixFilePermissions.SetExecutablePermissions(fileName);
-            #pragma warning restore
+            else if (OperatingSystem.IsLinux()) {
+                execPermSet = UnixFilePermissions.SetExecutablePermissions(fileName);
+            }
 
             if (!execPermSet) {
                 WriteWarningMessage($"Unable to set executable permissions for temporary utility file: '{fileName}'");
