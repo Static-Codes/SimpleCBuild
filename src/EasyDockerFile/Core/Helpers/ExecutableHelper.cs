@@ -4,21 +4,36 @@ namespace EasyDockerFile.Core.Helpers;
 
 public static class ExecutableHelper
 {
-    public static string GetDockerExecutable() 
-    {
-        // Windows executable name pulled from:
-        // https://forums.docker.com/t/docker-credential-desktop-exe-executable-file-not-found-in-path-using-wsl2/100225/13
-        return IsWindows switch {
-            true => "docker-credential-desktop.exe",
-            false => "docker-desktop"
-        };
-    }
-
     public static string GetPythonExecutable() 
     {
         return IsWindows switch {
             true => "python",
             false => "python3"
+        };
+    }
+
+
+    public static string GetShellArg() 
+    {
+        return IsWindows switch {
+            true => "/c",
+            false => "-c"
+        };
+    }
+
+    public static string GetShellExecutable() 
+    {
+        return IsWindows switch {
+            true => "cmd.exe",
+            false => "/bin/bash"
+        };
+    }
+
+    public static string GetWhichExecutable() 
+    {
+        return IsWindows switch {
+            true => "where",
+            false => "which"
         };
     }
 }

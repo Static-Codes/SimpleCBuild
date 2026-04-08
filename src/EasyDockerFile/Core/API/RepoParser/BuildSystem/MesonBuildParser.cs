@@ -165,7 +165,7 @@ public partial class MesonBuildParser
             unixDependencies.Add(dependency);
         }
 
-        var dependencies = Platform.IsWindows switch {
+        var dependencies = OperatingSystem.IsWindows() switch {
             true => windowsDependencies,
             false => unixDependencies,
         };

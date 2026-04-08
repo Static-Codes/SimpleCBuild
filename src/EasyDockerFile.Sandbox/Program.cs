@@ -1,4 +1,4 @@
-﻿# region Test to ensure the docker images from Image.xml are properly serialized and the selection menu logic works as intended.
+﻿#region Test to ensure the docker images from Image.xml are properly serialized and the selection menu logic works as intended.
 // using static EasyDockerFile.Core.Helpers.InputHelper;
 // using static EasyDockerFile.Core.Loaders.FamilyLoader;
 // using Spectre.Console;
@@ -43,7 +43,7 @@
 // Console.WriteLine("{0}: {1}", nameof(selectedImage), selectedImage!.FullName);
 // Console.WriteLine($"Exiting Option Selected: {familyChoice.IsExitOption()}");
 // Console.WriteLine("{0}: {1}", nameof(selectedDockerImage.ImageName), selectedDockerImage.ImageName);
-# endregion
+#endregion
 
 #region Test to ensure the Debian package manifest functionality works as intended.
 // using EasyDockerFile.Core.API.PackageSearch;
@@ -115,23 +115,31 @@
 
 #region Autotools to CMake conversion testing.
 
-using EasyDockerFile.Core.Conversion;
-using EasyDockerFile.Core.Inspection;
+// using EasyDockerFile.Core.Conversion;
+// using EasyDockerFile.Core.Inspection;
 
-var projectDirectory = "/home/nerdy/repos/gnupg";
-var autotoolsConverter = new AutotoolsConverter(projectDirectory);
+// var projectDirectory = "/home/nerdy/repos/SCB/BuildSystemTests/Autotools/gnupg";
+// var autotoolsConverter = new AutotoolsConverter(projectDirectory);
 
-var autotoolsConversionResponse = autotoolsConverter.TranslateToCMake();
+// var autotoolsConversionResponse = autotoolsConverter.TranslateToCMake();
 
-Console.WriteLine(autotoolsConversionResponse.Completed);
-Console.WriteLine(autotoolsConversionResponse.CMakeListsFilePath);
-Console.WriteLine(autotoolsConversionResponse.CMakeInspectPath);
+// Console.WriteLine(autotoolsConversionResponse.Completed);
+// Console.WriteLine(autotoolsConversionResponse.CMakeListsFilePath);
+// Console.WriteLine(autotoolsConversionResponse.CMakeInspectPath);
 
-// This returns a list of all 4 json files returned by cmake_inspect.py
-var inspectionPaths = CMakeInspection.Run(autotoolsConversionResponse.CMakeInspectPath, projectDirectory);
+// // This returns a list of all 4 json files returned by cmake_inspect.py
+// var inspectionPaths = CMakeInspection.Run(autotoolsConversionResponse.CMakeInspectPath, projectDirectory);
 
-foreach (var path in inspectionPaths) {
-    Console.WriteLine(path);
-}
+// foreach (var path in inspectionPaths) {
+//     Console.WriteLine(path);
+// }
 
 #endregion
+
+#region "Docker Desktop Loading test"
+
+using static EasyDockerFile.Core.Loaders.DockerDesktopLoader;
+
+LoadDockerDesktop(); 
+
+# endregion
