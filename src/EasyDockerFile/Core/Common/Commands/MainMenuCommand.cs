@@ -145,6 +145,7 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
         var selectedDockerImage = GetSelectedDockerImage();
 
         settings.SetArchitectureString();
+        settings.SetOutputType();
 
         Console.WriteLine("Attempting to build for: ");
         WriteStateMessage($"{settings.ArchitectureString}");
@@ -167,7 +168,8 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
         
         await HandleCompilationAsync(config);
         
-        if (AnsiConsole.Confirm($"[{OrangeHex}][[INPUT]]: Would you like to remove all remaining docker containers?[/]")) {
+        var confirmationMessage = $"[{OrangeHex}][[INPUT]]: Would you like to remove all remaining docker containers?[/]";
+        if (AnsiConsole.Confirm(confirmationMessage)) {
             await RemoveAllContainers();
         }
         

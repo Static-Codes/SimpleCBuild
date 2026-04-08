@@ -15,16 +15,11 @@ namespace EasyDockerFile.Core.Common.Commands;
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
 public class MainMenuSettings : CommandSettings
 {
-    // -p
-    // --private
     [CommandOption("-p|--private")]
     [Description("Indicates the repository is private.")]
     [DefaultValue(false)]
     public bool PrivateFlagSet { get; init; }
 
-    // -r=https://github.com/user/repo
-    // --repo=https://github.com/user/repo
-    // --repository=https://github.com/user/repo
     [CommandOption("-r|--repo|--repository <VALUE>")]
     [Description("Specifies the repository you want to build from.")]
     [DefaultValue(null)]
@@ -34,6 +29,18 @@ public class MainMenuSettings : CommandSettings
     [Description("Specifies the architecture you want to build for.")]
     [DefaultValue(null)]
     public string? ArchitectureString { get; set; }
+
+
+    [CommandOption("-o|--output <VALUE>")]
+    [Description("Specifies the output type for the compiled binary.")]
+    [DefaultValue(null)]
+    public string? OutputType { get; set; }
+
+
+    [CommandOption("-t|--token <VALUE>")]
+    [Description("Specifies the OAuth token.")]
+    [DefaultValue(null)]
+    public string? OAuthToken { get; init; }
 
     
     /// <summary>
@@ -51,10 +58,18 @@ public class MainMenuSettings : CommandSettings
         );
     }
 
-    // -t=<TOKEN>
-    // --token=<TOKEN>
-    [CommandOption("-t|--token <VALUE>")]
-    [Description("Specifies the OAuth token.")]
-    [DefaultValue(null)]
-    public string? OAuthToken { get; init; }
+    /// <summary>
+    ///      <br/> Due to the requirement for [DefaultValue(type)] to be a compile time constant:
+    ///      <br/> The following mutator method is required and will be invoked by the global `settings` variable in MainMenuCommand.
+    ///      <br/> OutputType is guaranteed to be a non-null value after the execution of this function.
+    /// </summary>
+    [MemberNotNull(nameof(OutputType))]
+    public void SetOutputType() 
+    {
+        OutputType ??= InputHelper.AskForInput(
+            message: "Please select your desired output type.",
+            options: ["Executable", "Shared Library", "Static Library"],
+            pageSize: 3
+        );
+    }
 }
