@@ -29,13 +29,12 @@ queryReplyDirectory = apiDirectory / "reply"
 
 
 try:
-    print(f"Making a CMake API query using local file at: {queryRequestFilePath}")
-
+    print(f"-- Making a CMake API query using local file at: {queryRequestFilePath}")
 
     if queryReplyDirectory.exists():
-        print("Build artifacts remaining from the last execution, these will be deleted now.")
+        print("-- Build artifacts remaining from the last execution, these will be deleted now.")
         shutil.rmtree(queryReplyDirectory)
-        print("Removed successfully.")
+        print("-- Removed successfully.")
 
     queryRequestFilePath.parent.mkdir(parents=True, exist_ok=True)
     
@@ -43,38 +42,37 @@ try:
     queryRequestFilePath.touch()
 
 except Exception as e:
-    print("Unable to create a temporary query file.")
-    print(f"Error: {e}")
+    print("-- Unable to create a temporary query file.")
+    print(f"-- Error: {e}")
     sys.exit(3)
 
-print("Executing 'cmake -S . -B build'")
+# print("Executing 'cmake -S . -B build'")
 try:
     result = subprocess.run(
         ["cmake", "-S", ".", "-B", "build"],
         cwd=repoDirectory,
         capture_output=False,
-        text=True
+        text=False,
+
     )
     
     if result.returncode != 0:
-        print(f"CMake failed with exit code {result.returncode}")
+        print(f"-- CMake failed with exit code {result.returncode}")
         sys.exit(4)
 
 except FileNotFoundError:
-    print("Error: CMake was not found, please ensure it is installed.")
+    print("-- Error: CMake was not found, please ensure it is installed.")
     sys.exit(1)
 
 except Exception as e:
-    print(f"An unexpected error occurred: {e}")
+    print(f"-- An unexpected error occurred: {e}")
     sys.exit(4)
 
 if queryReplyDirectory.exists():
-    globPaths = queryReplyDirectory.glob("*.json")
-    path_names = [globPath.name for globPath in globPaths]
+    globPaths = queryReplyDirectory.glob("codemodel-v2-*.json")
+    path_names = [str(globPath.absolute()) for globPath in globPaths]
     print("| ".join(path_names))
-    # for globPath in globPaths:
-    #     print(f"{globPath.name}")
 
 
 else:
-    print("CMake execution completed, however, the API did not generate a reply.")
+    print("-- CMake execution completed, however, the API did not generate a reply.")
