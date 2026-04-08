@@ -71,7 +71,7 @@ public class AutotoolsConverter(string projectDirectory)
             Thread.Sleep(350);
 
             File.Delete(oldBuildArtifacts[i]);
-            WriteInformation($"Deleted old build artifact at: {oldBuildArtifacts[i]} ({i}/{oldBuildArtifacts.Length})");
+            WriteInformation($"Deleted old build artifact at: {oldBuildArtifacts[i]} ({i+1}/{oldBuildArtifacts.Length})");
             Thread.Sleep(350);
         }
 
