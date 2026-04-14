@@ -5,6 +5,7 @@
 # 2 -> Invalid arguments provided.
 # 3 -> queryFile was not created.
 # 4 -> CMake execution failed.
+# 5 -> No CodeModel file was found.
 
 
 import sys
@@ -51,8 +52,7 @@ try:
     result = subprocess.run(
         ["cmake", "-S", ".", "-B", "build"],
         cwd=repoDirectory,
-        capture_output=False,
-        text=False,
+        text=True,
 
     )
     
@@ -68,10 +68,24 @@ except Exception as e:
     print(f"-- An unexpected error occurred: {e}")
     sys.exit(4)
 
+path_names = []
+
 if queryReplyDirectory.exists():
     globPaths = queryReplyDirectory.glob("codemodel-v2-*.json")
-    path_names = [str(globPath.absolute()) for globPath in globPaths]
-    print("| ".join(path_names))
+
+    try:
+        path_names = [str(globPath.absolute()) for globPath in globPaths]
+
+    except Exception as e:
+        print(f"-- Error: {e}")
+        print("-- Unable to locate CMake CodeModel*.json files.")
+        exit(5)
+
+    if (len(path_names) == 0):
+        print("-- Unable to locate any CMake CodeModel*.json files.")
+        exit(5)
+
+    print(f"Paths:\n{"\n".join(path_names)}")
 
 
 else:
