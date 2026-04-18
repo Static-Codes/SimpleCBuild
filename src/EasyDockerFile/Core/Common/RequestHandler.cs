@@ -1,7 +1,7 @@
 namespace EasyDockerFile.Core.Common;
 public static class RequestManager
 {
-    public static readonly string DefaultUserAgent = "Mozilla/5.5 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/146.0";
+    public static readonly string DefaultUserAgent = "Mozilla/5.5 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/149.0";
 
     public static class NetworkClient
     {
