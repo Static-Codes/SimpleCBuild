@@ -1,12 +1,10 @@
-using static EasyDockerFile.Core.Common.Platform;
-
 namespace EasyDockerFile.Core.Helpers;
 
 public static class ExecutableHelper
 {
     public static string GetPythonExecutable() 
     {
-        return IsWindows switch {
+        return OperatingSystem.IsWindows() switch {
             true => "python",
             false => "python3"
         };
@@ -15,7 +13,7 @@ public static class ExecutableHelper
 
     public static string GetShellArg() 
     {
-        return IsWindows switch {
+        return OperatingSystem.IsWindows() switch {
             true => "/c",
             false => "-c"
         };
@@ -23,7 +21,7 @@ public static class ExecutableHelper
 
     public static string GetShellExecutable() 
     {
-        return IsWindows switch {
+        return OperatingSystem.IsWindows() switch {
             true => "cmd.exe",
             false => "/bin/bash"
         };
@@ -31,7 +29,7 @@ public static class ExecutableHelper
 
     public static string GetWhichExecutable() 
     {
-        return IsWindows switch {
+        return OperatingSystem.IsWindows() switch {
             true => "where",
             false => "which"
         };
