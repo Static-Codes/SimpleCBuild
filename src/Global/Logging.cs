@@ -19,7 +19,7 @@ internal static class Logging
         }
     }
 
-    public static void WriteInformation(string whiteText = "", string coloredText = "", string textColor = "blue") 
+    public static void WriteInformation(string whiteText = "", string coloredText = "", string textColor = "blue", string tagName = InfoTag, string tagNameColor = "blue") 
     {
         string[] validColors = ["blue", "purple", "orange"];
 
@@ -33,9 +33,11 @@ internal static class Logging
         }
 
         textColor = textColor == "orange" ? OrangeHex : textColor;
+        tagNameColor = tagNameColor == "orange" ? OrangeHex : tagNameColor;
 
-        AnsiConsole.MarkupLine($"[blue]{InfoTag}[/] [{textColor}]{coloredText.EscapeMarkup()}[/] {whiteText.EscapeMarkup()}");
+        AnsiConsole.MarkupLine($"[{tagNameColor}]{tagName}[/] [{textColor}]{coloredText.EscapeMarkup()}[/] {whiteText.EscapeMarkup()}");
     }
+
     public static void WriteStateMessage(string message) => AnsiConsole.MarkupLine($"[blue]{message}[/]");
 
     public static void WriteSuccessMessage(string message) => AnsiConsole.MarkupLine($"[green]{SuccessTag}[/] {message.EscapeMarkup()}");
