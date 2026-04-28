@@ -1,5 +1,6 @@
 ﻿using EasyDockerFile.Core.Common.Commands;
 using Spectre.Console.Cli;
+using static EasyDockerFile.Core.Helpers.DirectoryHelper;
 using static Global.Logging;
 
 var app = new CommandApp<MainMenuCommand>();
@@ -18,4 +19,8 @@ app.Configure(config =>
     config.SetApplicationName("SimpleCBuild");
 });
 
+// Creates directories for cache, config, data, and output
+CreateAppDirectories();
+
+// Entry point to the application.
 return await app.RunAsync(args, cancellationTokenSource.Token);

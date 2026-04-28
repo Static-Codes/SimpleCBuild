@@ -1,6 +1,7 @@
-using System.Text.RegularExpressions;
+using System.Text;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using static Global.Constants;
 
 namespace Global.Build;
 
@@ -53,8 +54,11 @@ public class BuildSystemInfo
     /// </summary>
     public BuildSystemName? GetBuildSystemName() => Enum.TryParse<BuildSystemName>(Name, true, out var result) ? result : null;
 
+
     /// <summary>
     ///     Returns either the found PackageManagerName or a null value
     /// </summary>
     public PackageManagerName? GetPackageManagerName() => Enum.TryParse<PackageManagerName>(Name, true, out var result) ? result : null;
+
+    
 }

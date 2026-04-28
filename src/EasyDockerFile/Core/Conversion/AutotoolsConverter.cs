@@ -1,9 +1,13 @@
 using EasyDockerFile.Core.Extensions;
+using EasyDockerFile.Core.Inspections;
 using EasyDockerFile.Core.Types.Conversion;
+using EasyDockerFile.Core.Types.Inspections.CMake;
 using System.Diagnostics;
+using System.Text.Json;
 using static EasyDockerFile.Core.Helpers.ExecutableHelper;
 using static EasyDockerFile.Core.Helpers.ProcessHelper;
 using static EasyDockerFile.Core.Loaders.ConversionLoader;
+using static EasyDockerFile.Core.Types.Inspections.CMake.CodeModelTypes;
 using static Global.Logging;
 
 
@@ -34,7 +38,7 @@ public class AutotoolsConverter(string projectDirectory)
         List<string> oldBuildArtifacts = [];
 
         var rootCMakeFile = Path.Combine(ProjectDirectory, "CMakeLists.txt");
-        
+
         if (File.Exists(rootCMakeFile)) {
             oldBuildArtifacts.Add(rootCMakeFile);
         }
@@ -54,7 +58,7 @@ public class AutotoolsConverter(string projectDirectory)
         return [.. oldBuildArtifacts];
     }
 
-    public void DeleteOldBuildArtifacts() 
+    private void DeleteOldBuildArtifacts() 
     {
         var oldBuildArtifacts = FindOldBuildArtifacts();
 
@@ -70,15 +74,36 @@ public class AutotoolsConverter(string projectDirectory)
         {
             Thread.Sleep(350);
 
-            File.Delete(oldBuildArtifacts[i]);
+            try {
+                File.Delete(oldBuildArtifacts[i]);
+            }
+            catch (Exception ex) {
+                WriteWarningMessage($"Unable to delete file at: {oldBuildArtifacts[i]}");
+                WriteErrorMessage(ex.Message);
+                continue;
+            }
+
             WriteInformation($"Deleted old build artifact at: {oldBuildArtifacts[i]} ({i+1}/{oldBuildArtifacts.Length})");
             Thread.Sleep(350);
         }
 
-        WriteSuccessMessage($"Deleted all build artifacts from: {ProjectDirectory}");
+        var cmakeBuildDirectory = Path.Combine(ProjectDirectory, "build", ".cmake");
+
+        if (Directory.Exists(cmakeBuildDirectory)) {
+            try {
+                Directory.Delete(cmakeBuildDirectory, recursive: true);
+            }
+            catch (Exception ex) {
+                WriteWarningMessage($"Unable to delete directory at: {cmakeBuildDirectory}");
+                WriteErrorMessage(ex.Message);
+                return;
+            }
+        }
+
+        WriteSuccessMessage($"Deleted all old build artifacts from: {ProjectDirectory}");
     }
 
-    public AutotoolsConversionResponse TranslateToCMake() 
+    private AutotoolsConversionResponse TranslateToCMake() 
     {
         DeleteOldBuildArtifacts();
 
@@ -148,11 +173,43 @@ public class AutotoolsConverter(string projectDirectory)
 
         return new() {
             Completed = cmakeListFileExists,
-            CMakeListsFilePath =  cmakeListFileExists ? cmakeListFilePath : "Not Generated",
+            RootCMakeListsPath =  cmakeListFileExists ? cmakeListFilePath : "Not Generated",
             // No explicit null check is required.
             CMakeInspectPath = AutotoolsResources.CMakeInspectPath!
         };
     }    
 
+    public List<CodeModelReplyTarget.Root>? TranslateToCMakeAndInspect() 
+    {
+        var conversionResponse = TranslateToCMake();
 
+        if (!conversionResponse.Completed) {
+            WriteErrorMessage($"The Autotools to CMake conversion failed for: {ProjectDirectory}", exitCode: 1, exit: true);
+        }
+
+        // This returns a list of all CodeModel-v2-{uuid}.json files returned by cmake_inspect.py
+        var codeModelJSONFile = CMakeInspection.Run(conversionResponse.CMakeInspectPath, ProjectDirectory);
+
+
+        if (string.IsNullOrEmpty(codeModelJSONFile)) {
+            Console.WriteLine("The CMake CodeModel JSON file could not located, deserialization is not possible.");
+            Environment.Exit(1);
+        }
+
+        var codeModelStream = new FileStream(codeModelJSONFile, FileMode.Open, FileAccess.Read);
+
+        var codeModelData = JsonSerializer.Deserialize<CodeModelRoot>(codeModelStream);
+
+        if (codeModelData == null) {
+            Console.WriteLine("CMake CodeModel JSON data is null, deserialization is not possible.");
+            Environment.Exit(1);
+        }
+
+        var processedModelList = CodeModelProcessor.ProcessCodeModel(codeModelData);
+
+
+        return processedModelList;
+
+    }
+    
 }

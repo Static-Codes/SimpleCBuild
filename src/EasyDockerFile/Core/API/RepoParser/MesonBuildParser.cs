@@ -1,11 +1,10 @@
-using EasyDockerFile.Core.Common;
 using EasyDockerFile.Core.Extensions;
 using EasyDockerFile.Core.Types.Build.Meson;
 using System.Text.RegularExpressions;
 using static EasyDockerFile.Core.Types.Build.Meson.MesonRegex;
 using static Global.Logging;
 
-namespace EasyDockerFile.Core.API.RepoParser.BuildSystem;
+namespace EasyDockerFile.Core.API.RepoParser;
 
 public partial class MesonBuildParser 
 {

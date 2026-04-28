@@ -1,13 +1,12 @@
-namespace EasyDockerFile.Core.Types.Git;
-
+using EasyDockerFile.Core.API.RepoParser;
 using EasyDockerFile.Core.Extensions;
 using EasyDockerFile.Core.Helpers;
+using Global.Build;
 using Octokit;
 using Spectre.Console;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using static Global.Logging;
+
+namespace EasyDockerFile.Core.Types.Git;
 
 public class RepoClient
 {
@@ -107,6 +106,98 @@ public class RepoClient
 
         return (true, rateLimitInfo);
     }
+
+    /// <summary>
+    /// Parses the current RepoClient's RepoInfoObj, and returns a partially initialized toolchain. <br/>
+    /// This function will be called in FinishToolchainDiscovery(Toolchain toolchain).
+    /// </summary> 
+    private Toolchain StartToolchainDiscovery(BuildSystemInfo[] buildSystemsInfo) 
+    {
+        PackageManagerName[] packageManagerName = [GetPackageManagerName()];
+
+        // The initial checks here are the first pass, if these 3 checks do not return, further parsing is done.
+        // CMake takes priority due to being the Gold Standard in the C/C++ communities.
+        if (_repoInfo.ProjectLanguages.Contains(RepoLanguage.CMake)) 
+        {
+            return new Toolchain() {
+                BuildSystems = [BuildSystemName.CMake],
+                PackageManagers = packageManagerName
+            };
+        }
+
+        // Make is also widely used, but secondary to CMake.
+        if (_repoInfo.ProjectLanguages.Contains(RepoLanguage.Makefile)) 
+        {
+            return new Toolchain() {
+                BuildSystems = [BuildSystemName.Make],
+                PackageManagers = packageManagerName
+            };
+        }
+
+        // Meson is increasingly common
+        // Installation should be done through pip3 using aptitude (python3-meson, etc)
+        if (_repoInfo.ProjectLanguages.Contains(RepoLanguage.Meson)) {
+            return new Toolchain() {
+                BuildSystems = [BuildSystemName.Meson],
+                PackageManagers = [PackageManagerName.Apt] 
+            };
+        }
+
+        // var buildSystemName = BuildSystemLocator.Locate(_repoInfo.TreeFiles);
+
+        // if (buildSystemName == null) {
+        //     WriteWarningMessage("Unable to locate any supported build systems in the specified project.");
+        //     WriteErrorMessage(
+        //         message: "buildSystemName is null in DetermineLanguageForCompilation()", 
+        //         exitCode: 1, 
+        //         exit: true
+        //     );
+        // }
+
+        return new Toolchain() {
+            BuildSystems = buildSystemsInfo.GetBuildSystemNames(),
+            PackageManagers = [PackageManagerName.Apt]
+        };
+
+
+
+    }
+
+    /// <summary>
+    /// This function finish initializing the toolchain object passed as a parameter.
+    /// </summary> 
+    private Toolchain FinishToolchainDiscovery(Toolchain toolchain) 
+    {
+        var compilerName = CompilerLocator.LocateFromProject(_repoInfo.TreeFiles);
+        toolchain.CompilerName = compilerName;
+        // TODO: Implement these.
+        // toolchain.SubModules // Needs implementing.
+        // toolchain.MinimumVersionSupported // Needs implementing.
+
+        return toolchain;
+    }
+
+    public Toolchain DiscoverToolchain(BuildSystemInfo[] buildSystemsInfo) 
+    {
+        var toolchain = StartToolchainDiscovery(buildSystemsInfo);
+        return FinishToolchainDiscovery(toolchain);
+    }
+
+    /// <summary>
+    ///     Checks the files in the repository for Conan and VCPKG, if neither are found, Aptitude is used.
+    /// </summary>
+    private PackageManagerName GetPackageManagerName() 
+    {
+        if (_repoInfo.TreeFiles.AnyAreFound(["*conanfile.txt", "*conanfile.py"])) {
+            return PackageManagerName.Conan;
+        }
+
+        if (_repoInfo.TreeFiles.AnyAreFound(["*vcpkg.json"])) {
+            return PackageManagerName.VCPkg;
+        }
+
+        return PackageManagerName.Apt;
+    }
     
     /// <summary>
     ///     Used in UpdateProjectLanguagesAsync()
@@ -156,7 +247,7 @@ public class RepoClient
             WriteWarningMessage("Unable to locate a repository at the provided uri.");
             WriteErrorMessage("_client.Repository is null in UpdateBranchesAsync()");
             WriteInformation("If you are positive the uri you provided is correct, please run:");
-            Console.WriteLine("[COMMAND]: easy-dockerfile --private url/to/repo");
+            Console.WriteLine("[COMMAND]: simplecbuild --private url/to/repo");
             Environment.Exit(1);
         }
         IReadOnlyList<Branch> branchesObj = [];
@@ -180,7 +271,7 @@ public class RepoClient
             WriteErrorMessage("Error type: NotFoundException");
             WriteErrorMessage($"Repository uri `{_repoInfo.RepoUrlObj.GetAbsoluteUrlOfRepo()}` was not resolved.");
             WriteInformation("If you are positive the uri you provided is correct, please run:");
-            Console.WriteLine("[COMMAND]: easy-dockerfile --private url/to/repo");
+            Console.WriteLine("[COMMAND]: simplecbuild --private url/to/repo");
             Environment.Exit(1);
         }
         
@@ -202,6 +293,7 @@ public class RepoClient
     public async Task UpdateBranchFileCount() {
         _repoInfo.SelectedBranchFileCount = await GetFileCountOfBranch();
     }
+
     public async Task UpdateProjectLanguagesAsync() 
     {
         var parsedLangs = new List<RepoLanguage>();

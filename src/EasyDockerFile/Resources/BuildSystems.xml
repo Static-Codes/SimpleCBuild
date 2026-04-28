@@ -69,6 +69,7 @@
         <build_files>
             <root_build_file>CMakeList.txt</root_build_file>
             <global_build_pattern>*.cmake</global_build_pattern>
+            <global_build_pattern>*toolchain*.cmake</global_build_pattern>
             <global_build_file>CMakePresets.json</global_build_file>
         </build_files>
         <installation>
@@ -111,6 +112,14 @@
         <build_files>
             <root_build_pattern>*.sln</root_build_pattern>
             <global_build_pattern>*.vcxproj</global_build_pattern>
+        </build_files>
+    </system>
+
+    <system>
+        <name>Ninja</name>
+        <build_files>
+            <global_build_pattern>*build.ninja</global_build_pattern>
+            <global_build_pattern>*.ninja_deps</global_build_pattern>
         </build_files>
     </system>
 </systems>

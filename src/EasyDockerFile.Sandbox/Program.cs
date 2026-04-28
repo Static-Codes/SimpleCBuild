@@ -45,7 +45,7 @@
 // Console.WriteLine("{0}: {1}", nameof(selectedDockerImage.ImageName), selectedDockerImage.ImageName);
 #endregion
 
-#region Test to ensure the Debian package manifest functionality works as intended.
+// #region Test to ensure the Debian package manifest functionality works as intended (This was removed but this test exists for future reference).
 // using EasyDockerFile.Core.API.PackageSearch;
 // using System.Runtime.InteropServices;
 
@@ -55,91 +55,91 @@
 // foreach (var manifest in debianPackageApi.PackageManifests[..10]) {
 //     Console.WriteLine(manifest);
 // }
-#endregion
-
-#region Testing RepoInfo
-
-// using EasyDockerFile.Core.API.ToolchainSearch.Git;
-// using EasyDockerFile.Core.Types.Git;
-
-// // public repo test
-// // var repoInfoObj = new RepoInfo("https://github.com/Static-Codes/BrowserAutomationMaster");
-
-// // private repo test
-// var repoInfoObj = new RepoInfo("https://github.com/Static-Codes/bamm-install-hosted", args);
-
-// // invalid repo test
-// // var repoInfoObj = new RepoInfo("https://github.com/Static-Codes/BrowserAutomationMasterxcv");
+// #endregion
 
 
-// var client = new RepoClient(repoInfoObj);
-// await client.UpdateBranchesAsync();
-// client.UpdateStatus();
-// Console.WriteLine(client);
 
-#endregion
+#region "Testing CLI Commands + Repo Info"
+using EasyDockerFile.Core.Common.Commands;
+using Spectre.Console;
+using Spectre.Console.Cli;
 
+var app = new CommandApp<MainMenuCommand>();
 
-#region Testing CLI Commands
+var cancellationTokenSource = new CancellationTokenSource();
 
-// using EasyDockerFile.Core.Common.Commands;
-// using Spectre.Console;
-// using Spectre.Console.Cli;
+Console.CancelKeyPress += (_, e) =>
+{
+    e.Cancel = true; // Preventing the process from terminating immediately
+    cancellationTokenSource.Cancel();
+    AnsiConsole.WriteLine("[red]Cancellation requested...[/]");
+    Environment.Exit(1);
+};
 
-// var app = new CommandApp<MainMenuCommand>();
+app.Configure(config =>
+{
+    config.SetApplicationName("SimpleCBuild");
+});
 
-// var cancellationTokenSource = new CancellationTokenSource();
-
-// Console.CancelKeyPress += (_, e) =>
-// {
-//     e.Cancel = true; // Preventing the process from terminating immediately
-//     cancellationTokenSource.Cancel();
-//     AnsiConsole.WriteLine("[red]Cancellation requested...[/]");
-//     Environment.Exit(1);
-// };
-
-// app.Configure(config =>
-// {
-//     config.SetApplicationName("EasyDockerFile");
-// });
-
-// return await app.RunAsync(args, cancellationTokenSource.Token);
+return await app.RunAsync(args, cancellationTokenSource.Token);
 #endregion
 
 #region "Ongoing tests for meson.build parsing.
-// using EasyDockerFile.Core.API.RepoParser.BuildSystem;
+// using EasyDockerFile.Core.API.RepoParser;
 
 // MesonBuildParser.ParseBuildFile("/home/nerdy/Downloads/meson.build");
 
 #endregion
 
 #region Autotools to CMake conversion testing.
-
 // using EasyDockerFile.Core.Conversion;
-// using EasyDockerFile.Core.Inspection;
+// using static EasyDockerFile.Core.Types.Inspections.CMake.CodeModelTypes;
 
 // var projectDirectory = "/home/nerdy/repos/SCB/BuildSystemTests/Autotools/gnupg";
-// var autotoolsConverter = new AutotoolsConverter(projectDirectory);
+// var converter = new AutotoolsConverter(projectDirectory);
+// var processedModelList = converter.TranslateToCMakeAndInspect();
+// Console.WriteLine(processedModelList?.Count.ToString() ?? "null");
 
-// var autotoolsConversionResponse = autotoolsConverter.TranslateToCMake();
-
-// Console.WriteLine(autotoolsConversionResponse.Completed);
-// Console.WriteLine(autotoolsConversionResponse.CMakeListsFilePath);
-// Console.WriteLine(autotoolsConversionResponse.CMakeInspectPath);
-
-// // This returns a list of all 4 json files returned by cmake_inspect.py
-// var inspectionPaths = CMakeInspection.Run(autotoolsConversionResponse.CMakeInspectPath, projectDirectory);
-
-// foreach (var path in inspectionPaths) {
-//     Console.WriteLine(path);
-// }
 
 #endregion
 
 #region "Docker Desktop Loading test"
 
-using static EasyDockerFile.Core.Loaders.DockerDesktopLoader;
+// using static EasyDockerFile.Core.Loaders.DockerDesktopLoader;
 
-LoadDockerDesktop(); 
+// LoadDockerDesktop(); 
 
 # endregion
+
+# region "Testing how much data the application is using at startup"
+
+// var bytesToMebibytesFactor = Math.Pow(1024, 2);
+// Console.WriteLine(bytesToMebibytesFactor);
+// Console.WriteLine(Environment.WorkingSet);
+// Console.WriteLine(Environment.WorkingSet / bytesToMebibytesFactor);
+// Environment.Exit(1);
+
+# endregion
+
+
+# region "Testing header to package name mapping"
+
+// using EasyDockerFile.Core.API.PackageSearch.Mappers;
+// using EasyDockerFile.Core.Helpers;
+// using EasyDockerFile.Core.Types.System;
+
+// var mappings = await PackageMapper.GetMappings(System.Runtime.InteropServices.Architecture.Arm64);
+
+
+// #if DEBUG
+//     DebugHelper.RunTests(mappings);
+// #endif
+#endregion
+
+
+// #region "Testing SystemInfo"
+// using EasyDockerFile.Core.Types.System;
+// var systemInfo = new SystemInfo();
+
+// RAMKit? value = systemInfo.MemoryInfo.HasValue ? systemInfo.MemoryInfo.Value.KitInfo : null;
+// #endregion

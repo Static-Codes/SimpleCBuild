@@ -13,10 +13,10 @@ public class AutotoolsConversionResponse
     public required bool Completed { get; set; }
 
     /// <summary>
-    /// The path to the generated CMakeList.txt file. <br/>
+    /// The path to the generated CMakeList.txt file in the project directory's root. <br/>
     /// Note: An error will be thrown trying to access this member, if Completed is false.
     /// </summary>
-    public required string CMakeListsFilePath { get; set; }
+    public required string RootCMakeListsPath { get; set; }
     
     /// <summary>
     /// The path to the temporary utility file, that will be used to convert the cmake file to a JSON object, then serialized to a custom type later in the session.

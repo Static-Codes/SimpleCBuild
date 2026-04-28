@@ -12,11 +12,10 @@ public enum ToolchainName
     Ninja = 6,
 }
 
-
-public class Toolchain 
+public class Toolchain()
 {
-    public required BuildSystemName BuildSystem;
-    public string? MinimumVersionSupported { get; set; }
+    public required BuildSystemName[] BuildSystems;
+    // public string? MinimumVersionSupported { get; set; }
     public required PackageManagerName[] PackageManagers { get; set; }
     public Dictionary<string, string>? SubModules { get; set; }
     public CompilerName? CompilerName { get; set; }

@@ -150,25 +150,28 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
         Console.WriteLine("Attempting to build for: ");
         WriteStateMessage($"{settings.ArchitectureString}");
 
+        // Locating supported build systems by utilizing the patterns returned in the serialized representation of BuildSystems.xml
+        var buildSystemsInfo = GetBuildSystemInfo(repoInfoObj, settings.ArchitectureString);
 
-        var buildSystemInfo = GetBuildSystemInfo(repoInfoObj, settings.ArchitectureString);
-        
-        if (!buildSystemInfo.Any()) {
+        if (!buildSystemsInfo.Any()) {
             WriteErrorMessage("Unable to detect any build systems in the specified repository, please try again.", exitCode: 1, exit: true);
         }
 
-        WriteSuccessMessage($"Detected {buildSystemInfo.Count()} Build Systems.");
+        WriteSuccessMessage($"Detected {buildSystemsInfo.Count()} Build Systems.");
+
+        var toolchain = client.DiscoverToolchain([..buildSystemsInfo]);
 
         var config = new BuildConfig() {
             Settings = settings,
             RepoInfoObj = repoInfoObj,
-            BuildSystemInfo = buildSystemInfo,
+            BuildSystemsInfo = buildSystemsInfo,
+            Toolchain = toolchain,
             SelectedDockerImage = selectedDockerImage
         };
         
         await HandleCompilationAsync(config);
         
-        var confirmationMessage = $"[{OrangeHex}][[INPUT]]: Would you like to remove all remaining docker containers?[/]";
+        var confirmationMessage = $"[{OrangeHex}]]{InfoTag}: Would you like to remove all remaining docker containers?[/]";
         if (AnsiConsole.Confirm(confirmationMessage)) {
             await RemoveAllContainers();
         }
@@ -230,6 +233,7 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
     }
     
     // Currently supports Autotools, Bazel, CMake, Make, and Meson.
+    // This is replaced with <build_commands> which is serialized from BuildSystems.xml into BuildSystemInfo.BuildCommands
     private static List<string> GetBuildCommands(BuildSystemInfo system)
     {
         return system.Name switch
@@ -243,17 +247,16 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
         };
     }
 
-    private static IEnumerable<BuildSystemInfo> GetBuildSystemInfo(RepoInfo repoInfo, string architectureString) 
+    public static IEnumerable<BuildSystemInfo> GetBuildSystemInfo(RepoInfo repoInfo, string architectureString) 
     {
         var allSupportedSystems = BuildSystemLoader.GetBuildSystems(architectureString);
         IEnumerable<BuildSystemInfo> foundSystems = [];
 
-        var allFiles = repoInfo.TreeFiles;
-        var rootFiles = allFiles.Where(f => !f.Contains('/'));
+        var rootFiles = repoInfo.TreeFiles.Where(f => !f.Contains('/'));
 
         foreach (var system in allSupportedSystems) 
         {
-            if (system.IsPresent(allFiles, rootFiles)) {
+            if (system.IsPresent(repoInfo.TreeFiles, rootFiles)) {
                 foundSystems = foundSystems.Append(system);
             }
         }
@@ -274,7 +277,6 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
     private static DockerImage GetSelectedDockerImage() 
     {
         var families = GetFamilies();
-
 
         // Uncomment this block if multiple image families are reintroduced.
         // Choosing image family
@@ -333,9 +335,9 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
             Environment.Exit(1);
         }
 
-        foreach (var buildSystem in config.BuildSystemInfo) 
+        foreach (var buildSystem in config.BuildSystemsInfo) 
         {
-            WriteStateMessage($"Attempting to compile using {buildSystem.Name}...");
+            WriteStateMessage($"Attempting to compile using:\n{config}...");
             
             var buildCommands = GetBuildCommands(buildSystem);
             var buildInstructions = config!.SelectedDockerImage!.GetInstructions(
@@ -377,7 +379,8 @@ public class MainMenuCommand : AsyncCommand<MainMenuSettings>
                 WriteStateMessage($"[[Source]]: {exportSourcePath}");
                 WriteStateMessage($"[[Destination]]: {hostOutputDirectory}");
                 
-                if (await ExtractBuildFilesFromContainer(tagName, config.RepoInfoObj.RepoUrlObj.RepoName, hostOutputDirectory)) {
+                if (await ExtractBuildFilesFromContainer(tagName, config.RepoInfoObj.RepoUrlObj.RepoName, hostOutputDirectory)) 
+                {
                     WriteSuccessMessage($"Files transferred to {hostOutputDirectory}");
 
                     if (File.Exists(tempDockerFilePath)) {

@@ -1,5 +1,6 @@
 using System.Text;
 using EasyDockerFile.Core.Types.Git;
+using EasyDockerFile.Core.Types.System;
 using Octokit;
 using static Global.Constants;
 
@@ -45,12 +46,15 @@ public static class StringExtension
         return MesonUnixSystemNames.Contains(SystemName);
     }
 
+    public static string SanitizeCapacity(this RAMCapacity capacity) {
+        return capacity.ToString()!.Replace("_", "");
+    }
+
     /// <summary>
     /// Primarily used to convert Enum member names to their string representation.
     /// </summary>
     public static string Sanitize(this object Enum) {
         return Enum.ToString()!.Replace("_", " ");
     }
-
 
 }

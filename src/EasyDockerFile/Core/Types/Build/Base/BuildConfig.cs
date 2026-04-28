@@ -1,3 +1,4 @@
+using System.Text;
 using DockerFileSharp.Common;
 using EasyDockerFile.Core.Common.Commands;
 using EasyDockerFile.Core.Types.Git;
@@ -11,7 +12,8 @@ public class BuildConfig
 {
     public MainMenuSettings? Settings { get; set; }
     public RepoInfo? RepoInfoObj { get; set; }
-    public IEnumerable<BuildSystemInfo> BuildSystemInfo { get; set; } = [];
+    public IEnumerable<BuildSystemInfo> BuildSystemsInfo { get; set; } = [];
+    public Toolchain? Toolchain { get; set; }
     public DockerImage? SelectedDockerImage { get; set; }
     public bool IsValid() 
     {
@@ -26,5 +28,36 @@ public class BuildConfig
             }
         }
         return true;
+    }
+
+    public override string ToString()
+    {
+        var fields = GetType().GetFields(_publicInstanceFlag);
+        var stringBuilder = new StringBuilder();
+        foreach (var field in fields) 
+        {
+            if (field.FieldType == typeof(string)) {
+                stringBuilder.AppendLine($"{field.Name}: {field.GetValue(this)}");
+            }
+
+            if (field.FieldType == typeof(string[])) {
+                stringBuilder.AppendLine($"{field.Name}");
+                var arrayMembersObj = field.GetValue(this);
+
+                ArgumentNullException.ThrowIfNull(arrayMembersObj, nameof(arrayMembersObj));
+
+                var arrayMembers = (string[])arrayMembersObj;
+
+                foreach (string member in arrayMembers) {
+                    stringBuilder.AppendLine($"\t- {member}");
+                }
+            }
+
+            else {
+                stringBuilder.AppendLine($"{field.Name}");
+                stringBuilder.AppendLine($"\t{field}");
+            }
+        }
+        return stringBuilder.ToString();
     }
 }

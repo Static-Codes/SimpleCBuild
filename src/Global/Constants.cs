@@ -18,4 +18,5 @@ internal class Constants
     public const string WarningTag = "[[WARNING]]:";
     public const string SuccessTag = "[[SUCCESS]]:";
     public const string OrangeHex = "#FFAF00";
+    public const string ProjectIssueLink = "https://github.com/Static-Codes/SimpleCBuild/issues";
 }
