@@ -96,19 +96,39 @@
             <root_build_file>makefile</root_build_file>
             <global_build_file>GNUmakefile</global_build_file>
         </build_files>
+
+        <installation>
+            <debian>
+                <x64>
+                    <installation_command>apt install make build-essential</installation_command>
+                </x64>
+                <arm64>
+                    <installation_command>apt install make build-essential</installation_command>
+                </arm64>
+            </debian>
+        </installation>
+
     </system>
 
     <system>
         <name>Meson</name>
+
         <build_files>
             <root_build_file>meson.build</root_build_file>
             <global_build_file>meson_options.txt</global_build_file>
         </build_files>
+
         <installation>
             <debian>
-                <installation_command>apt install meson ninja-build -y</installation_command>
+                <x64>
+                    <installation_command>apt install meson ninja-build -y</installation_command>
+                </x64>
+                <arm64>
+                    <installation_command>echo "FIX ME (Meson | ARM64) in BuildSystems.xml"</installation_command>
+                </arm64>
             </debian>
         </installation>
+
         <build_commands>
             <debian>
                 <build_command>meson setup build</build_command>
@@ -119,47 +139,73 @@
 
     <system>
         <name>MSBuild</name>
+
         <build_files>
             <root_build_pattern>*.sln</root_build_pattern>
             <global_build_pattern>*.vcxproj</global_build_pattern>
         </build_files>
+
         <installation>
             <debian>
-                <installation_command>
-                    wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
-                </installation_command>
-                <installation_command>chmod +x dotnet-install.sh</installation_command>
-                <installation_command>
-                    ./dotnet-install.sh --channel 10.0 --install-dir ./dotnet
-                </installation_command>
-                <installation_command>export DOTNET_ROOT=$(pwd)/dotnet</installation_command>
-                <installation_command>export PATH=$PATH:$(pwd)/dotnet</installation_command>
+                <x64>
+                    <installation_command>
+                        wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+                    </installation_command>
+                    <installation_command>chmod +x dotnet-install.sh</installation_command>
+                    <installation_command>
+                        ./dotnet-install.sh --channel 10.0 --install-dir ./dotnet
+                    </installation_command>
+                    <installation_command>export DOTNET_ROOT=$(pwd)/dotnet</installation_command>
+                    <installation_command>export PATH=$PATH:$(pwd)/dotnet</installation_command>
+                </x64>
+                <arm64>
+                    <installation_command>
+                        wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+                    </installation_command>
+                    <installation_command>chmod +x dotnet-install.sh</installation_command>
+                    <installation_command>
+                        ./dotnet-install.sh --channel 10.0 --install-dir ./dotnet
+                    </installation_command>
+                    <installation_command>export DOTNET_ROOT=$(pwd)/dotnet</installation_command>
+                    <installation_command>export PATH=$PATH:$(pwd)/dotnet</installation_command>
+                </arm64>
             </debian>
         </installation>
+
         <build_commands>
             <debian>
                 <build_command>dotnet build -c Release -p:terminalLogger=off</build_command>
                 <build_command>meson compile -C build</build_command>
             </debian>
         </build_commands>
+
     </system>
 
     <system>
         <name>Ninja</name>
+
         <build_files>
             <global_build_pattern>*build.ninja</global_build_pattern>
             <global_build_pattern>*.ninja_deps</global_build_pattern>
         </build_files>
+
         <installation>
             <debian>
-                <installation_command>apt install meson ninja-build -y</installation_command>
+                <x64>
+                    <installation_command>apt install meson ninja-build -y</installation_command>
+                </x64>
+                <arm64>
+                    <installation_command>apt install meson ninja-build -y</installation_command>
+                </arm64>
             </debian>
         </installation>
+
         <build_commands>
             <debian>
                 <build_command>meson setup build</build_command>
                 <build_command>meson compile -C build</build_command>
             </debian>
         </build_commands>
+
     </system>
 </systems>
