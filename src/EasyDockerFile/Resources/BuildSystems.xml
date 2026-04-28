@@ -74,9 +74,19 @@
         </build_files>
         <installation>
             <debian>
-                <installation_command>apt-get install -y build-essential cmake</installation_command>
+                <x64>
+                    <installation_command>apt-get install -y build-essential cmake</installation_command>
+                </x64>
+                <arm64>
+                    <installation_command>apt-get install -y build-essential cmake</installation_command>
+                </arm64>
             </debian>
         </installation>
+        <build_commands>
+            <debian>
+                <build_command></build_command>
+            </debian>
+        </build_commands>
     </system>
 
     <system>
@@ -113,6 +123,25 @@
             <root_build_pattern>*.sln</root_build_pattern>
             <global_build_pattern>*.vcxproj</global_build_pattern>
         </build_files>
+        <installation>
+            <debian>
+                <installation_command>
+                    wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+                </installation_command>
+                <installation_command>chmod +x dotnet-install.sh</installation_command>
+                <installation_command>
+                    ./dotnet-install.sh --channel 10.0 --install-dir ./dotnet
+                </installation_command>
+                <installation_command>export DOTNET_ROOT=$(pwd)/dotnet</installation_command>
+                <installation_command>export PATH=$PATH:$(pwd)/dotnet</installation_command>
+            </debian>
+        </installation>
+        <build_commands>
+            <debian>
+                <build_command>dotnet build -c Release -p:terminalLogger=off</build_command>
+                <build_command>meson compile -C build</build_command>
+            </debian>
+        </build_commands>
     </system>
 
     <system>
@@ -121,5 +150,16 @@
             <global_build_pattern>*build.ninja</global_build_pattern>
             <global_build_pattern>*.ninja_deps</global_build_pattern>
         </build_files>
+        <installation>
+            <debian>
+                <installation_command>apt install meson ninja-build -y</installation_command>
+            </debian>
+        </installation>
+        <build_commands>
+            <debian>
+                <build_command>meson setup build</build_command>
+                <build_command>meson compile -C build</build_command>
+            </debian>
+        </build_commands>
     </system>
 </systems>
