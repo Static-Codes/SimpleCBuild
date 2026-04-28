@@ -1,8 +1,10 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
+using EasyDockerFile.Core.Extensions;
 using EasyDockerFile.Core.Helpers;
+using Global.Build;
 using Spectre.Console.Cli;
+using static Global.Constants;
 
 namespace EasyDockerFile.Core.Common.Commands;
 
@@ -32,7 +34,11 @@ public class MainMenuSettings : CommandSettings
 
 
     [CommandOption("-o|--output <VALUE>")]
-    [Description("Specifies the output type for the compiled binary.")]
+    [Description(
+        "Specifies the output type for the compiled binary.\n" +
+        "If this parameter is not passed, you will be prompted to make a selection.\n" +
+        "This serves as an optional way to utilize SimpleCBuild without going through selection menus."
+    )]
     [DefaultValue(null)]
     public string? OutputType { get; set; }
 
@@ -66,9 +72,23 @@ public class MainMenuSettings : CommandSettings
     [MemberNotNull(nameof(OutputType))]
     public void SetOutputType() 
     {
+        var foundTypes = 
+            typeof(OutputTypes)
+            .GetFields(_publicFlag)
+            .Select(field => field.Name.Sanitize());
+        
+        var types = foundTypes.Any() ? foundTypes : 
+        [
+            "Executable",
+            "Standalone Executable",
+            "Shared Library", 
+            "Static Library"
+        ];
+        
+        
         OutputType ??= InputHelper.AskForInput(
             message: "Please select your desired output type.",
-            options: ["Executable", "Shared Library", "Static Library"],
+            options: types,
             pageSize: 3
         );
     }
